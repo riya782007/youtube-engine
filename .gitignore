@@ -1,4 +1,5 @@
 # Secrets - NEVER commit these
+# Note: You will need to re-add .env and client_secret.json manually if you clone this repo to a new machine.
 .env
 client_secret.json
 youtube_token.json
