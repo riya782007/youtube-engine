@@ -1,0 +1,15 @@
+{
+  "channel": "ai-tadka",
+  "title": "ChatGPT se anime selfie sirf 30 second me",
+  "description": "India me 1 billion AI photos ban gayi hain. Tumhari abhi tak kyu nahi? Yeh trick aaj try karo.",
+  "hashtags": ["#ai", "#chatgpt", "#animeselfie", "#viral", "#trend"],
+  "music": "music/bgm.mp3",
+  "voice": "Ruko... India me ek billion AI photos ban gayi hain, aur tumhari abhi tak nahi? ChatGPT kholo, apni selfie upload karo. Ek line likho - turn this into a Studio Ghibli style anime portrait. Bas... 30 second me result tumhari screen pe hoga. Cinematic chahiye? 90s Bollywood poster chahiye? Sirf prompt change karo. Yeh trend India me viral ho raha hai. AI Tadka follow karke roz ek naya AI hack pao.",
+  "captions": [
+    { "icon": "🤯", "kicker": "RUKO", "line": "*1 billion* photos ban gayi", "broll": "person scrolling phone shocked face" },
+    { "icon": "📸", "kicker": "STEP 1", "line": "Selfie *upload* karo", "broll": "person taking selfie smartphone" },
+    { "icon": "✨", "kicker": "STEP 2", "line": "Prompt: *anime portrait*", "broll": "anime illustration art style" },
+    { "icon": "⚡", "kicker": "STEP 3", "line": "30 second me *ready*", "broll": "fast computer processing visual effects" },
+    { "icon": "🔥", "kicker": "VIRAL", "line": "Ab tumhari *bari* hai", "broll": "happy young indian creator phone" }
+  ]
+}

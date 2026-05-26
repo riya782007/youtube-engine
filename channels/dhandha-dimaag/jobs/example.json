@@ -1,0 +1,15 @@
+{
+  "channel": "dhandha-dimaag",
+  "title": "Rs 99 vs Rs 100: ye pricing trick kaam kyun karti hai",
+  "description": "Har dukaan ye trick use karti hai. Business ke peeche ka dimaag.",
+  "hashtags": ["#business", "#pricing", "#marketing", "#casestudy"],
+  "music": "music/bgm.mp3",
+  "voice": "Kabhi socha... cheezein nintyaanve rupaye mein kyun bikti hain, sau mein kyun nahi? Iske peeche ek dimaagi trick hai - ise kehte hain charm pricing. Hamara brain keemat ko left se right padhta hai, toh nintyaanve dekhte hi lagta hai - are, sau se kam hai! Farak sirf ek rupaye ka, par bikri kaafi badh jaati hai. Aise hi business ke peeche ka dimaag samajhna hai? Dhandha Dimaag ko follow karo.",
+  "captions": [
+    { "icon": "🤔", "kicker": "SOCHO", "line": "₹99 hi kyun,\n*₹100 kyun nahi*?", "broll": "store price tag shopping" },
+    { "icon": "🧠", "kicker": "TRICK", "line": "Ise kehte hain *charm pricing*", "broll": "retail store shelves products" },
+    { "icon": "👀", "kicker": "DIMAAG", "line": "Brain *left-to-right* padhta hai", "broll": "thinking person looking close" },
+    { "icon": "📈", "kicker": "ASAR", "line": "₹99 lagta hai **bahut kam**", "broll": "supermarket aisle products shelf" },
+    { "icon": "💡", "kicker": "LESSON", "line": "Farak *₹1*, bikri *badi*", "broll": "business growth success chart" }
+  ]
+}

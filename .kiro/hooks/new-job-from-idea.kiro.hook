@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "New Job From Idea",
+  "description": "Click to create a fresh job file from a one-line idea. Asks you which channel, takes the idea, and produces a complete 5-caption Hinglish job using the viral hook framework. Saves to channels/&lt;channel&gt;/jobs/ with a slugged filename.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "The user wants to scaffold a new job file from an idea. Workflow:\n\n1. Ask the user (one short message): \"Which channel (ai-tadka / paisa-pathshala / dhandha-dimaag) and what's the one-line idea?\"\n2. Wait for their answer.\n3. Read .kiro/steering/script-writing.md for the script structure and the 7 viral hook types.\n4. Read channels/&lt;chosen-channel&gt;/jobs/example.json as the schema reference.\n5. Write a complete job file:\n   - Pick a hook type that fits the idea (shock claim, pattern interrupt, ruko command, etc.)\n   - Compose a Hinglish voice script: 7 beats (hook, promise, step1, step2, step3, payoff, CTA), ~12-22s spoken.\n   - 5 captions matching the 5 main beats (skip CTA in captions). Each line ≤ 6 words. Wrap payoff word in *asterisks*.\n   - Use real emoji icons (🤯⚡💸📈✅🚀 etc).\n   - Pick English broll search terms that match each scene's mood.\n   - Use channel defaults for music (\"music/bgm.mp3\"), hashtags from channel.json's seo.default_hashtags.\n6. Save the file to channels/&lt;channel&gt;/jobs/&lt;slug&gt;.json (slug = title slugified, lowercase-dashes).\n7. Tell the user the path. Mention they can render it with the \"Render Current Job File\" hook.\n\nConstraints:\n- Hinglish only (mix Hindi + English naturally, no pure English or pure Hindi)\n- For paisa-pathshala: education only, no buy/sell calls\n- For dhandha-dimaag: only use facts you're confident in (warn the user to verify numbers)"
+  }
+}

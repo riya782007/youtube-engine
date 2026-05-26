@@ -1,0 +1,38 @@
+{
+  "name": "AI Tadka",
+  "handle": "@AITadka",
+  "tagline": "Roz ek naya AI tool / trick",
+  "niche": "AI tools & how-to (Hinglish)",
+  "_note": "Check name + handle availability on YouTube before creating the channel. Edit freely.",
+
+  "voice": {
+    "channel_preset": "ai",
+    "speaker": "aditya",
+    "pace": 1.08,
+    "temperature": 0.6,
+    "lang": "hi-IN",
+    "_speaker_options_to_try": ["aditya", "kabir", "advait", "soham", "rohan", "vidya", "shreya"],
+    "_note": "speaker overrides the channel_preset's default. aditya = modern young male (best Hindi/Hinglish neutral). kabir = younger / Gen-Z. advait = calm-confident. rohan = energetic but can sound Punjabi. vidya/shreya = female options. Run with `--speaker <name>` on make_video.py to A/B test without editing this file."
+  },
+
+  "theme": {
+    "bg_from": "#1b1b3a",
+    "bg_to": "#08081a",
+    "accent": "#4f8cff",
+    "accent2": "#9b6dff",
+    "text": "#ffffff",
+    "kicker": "#8fb6ff",
+    "motif_emoji": "🤖"
+  },
+
+  "watermark": "AI TADKA",
+  "music_mood": "upbeat electronic / tech",
+  "posting_times_ist": ["13:00", "20:30"],
+
+  "seo": {
+    "title_suffix": " #shorts",
+    "description_footer": "Roz naye AI tools, tricks aur shortcuts ke liye AI Tadka ko follow karo! 🤖\n\nDisclaimer: Educational + entertainment purpose ke liye.",
+    "default_hashtags": ["#shorts", "#ai", "#aitools", "#artificialintelligence", "#technology", "#hindi"],
+    "tags": ["ai tools", "ai tools hindi", "free ai tools", "artificial intelligence hindi", "chatgpt hindi", "ai for students", "ai productivity", "tech hindi", "ai tutorial hindi", "best ai tools 2026"]
+  }
+}

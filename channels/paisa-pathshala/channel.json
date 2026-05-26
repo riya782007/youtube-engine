@@ -1,0 +1,36 @@
+{
+  "name": "Paisa Pathshala",
+  "handle": "@PaisaPathshala",
+  "tagline": "Paise ki samajh, simple Hindi me",
+  "niche": "Personal finance & money skills (Hinglish)",
+  "_note": "Check name + handle availability on YouTube before creating. EDUCATION ONLY - never give specific buy/sell advice (policy + trust).",
+
+  "voice": {
+    "channel_preset": "finance",
+    "speaker": "shreya",
+    "pace": 1.0,
+    "temperature": 0.55,
+    "lang": "hi-IN"
+  },
+
+  "theme": {
+    "bg_from": "#0e2a1f",
+    "bg_to": "#06150f",
+    "accent": "#f5c518",
+    "accent2": "#2ecc71",
+    "text": "#ffffff",
+    "kicker": "#7fe0a8",
+    "motif_emoji": "🪙"
+  },
+
+  "watermark": "PAISA PATHSHALA",
+  "music_mood": "calm confident lo-fi / corporate",
+  "posting_times_ist": ["13:00", "20:30"],
+
+  "seo": {
+    "title_suffix": " #shorts",
+    "description_footer": "Paise ki samajh badhane ke liye Paisa Pathshala follow karo 💰\n\nDisclaimer: Yeh sirf educational content hai, financial advice nahi. Apne nivesh se pehle kisi SEBI-registered advisor se baat karein.",
+    "default_hashtags": ["#shorts", "#finance", "#personalfinance", "#paisa", "#moneytips", "#hindi"],
+    "tags": ["personal finance hindi", "money management hindi", "paise kaise bachaye", "saving tips hindi", "financial literacy", "money psychology", "budgeting hindi", "smart money", "financial education", "paisa management"]
+  }
+}

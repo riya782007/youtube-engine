@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "Surface New Render Output",
+  "description": "When a new output.mp4 appears under any channels/*/renders/ folder, post a clickable summary: file path, duration, size, and the suggested upload command. Skips the broll_*.mp4 intermediate clips.",
+  "version": "1",
+  "when": {
+    "type": "fileCreated",
+    "patterns": [
+      "channels/*/renders/*/output.mp4",
+      "channels/**/renders/**/output.mp4"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A new output.mp4 was just created from a render. Do this:\n\n1. Get its full path, file size (bytes), and duration via ffprobe.\n2. Find the upload.json in the same folder and read the title + channel.\n3. Post a brief summary in this format:\n   ✅ Render complete\n   • Channel: &lt;channel&gt;\n   • Title: &lt;title&gt;\n   • File: &lt;abs path&gt;\n   • Duration: Xs · Size: Y MB\n   • Review locally, then upload (defaults to private):\n       python scripts/upload.py --dir \"&lt;render folder&gt;\"\n\nDo not auto-upload. Do not run anything else."
+  }
+}

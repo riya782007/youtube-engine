@@ -1,0 +1,36 @@
+{
+  "name": "Dhandha Dimaag",
+  "handle": "@DhandhaDimaag",
+  "tagline": "Har business ke peeche ka dimaag",
+  "niche": "Business & startup stories / lessons (Hinglish)",
+  "_note": "Check name + handle availability on YouTube before creating. Verify facts/numbers in every story script before rendering.",
+
+  "voice": {
+    "channel_preset": "business",
+    "speaker": "manan",
+    "pace": 1.0,
+    "temperature": 0.6,
+    "lang": "hi-IN"
+  },
+
+  "theme": {
+    "bg_from": "#10213d",
+    "bg_to": "#070d18",
+    "accent": "#ff7a18",
+    "accent2": "#ffb347",
+    "text": "#ffffff",
+    "kicker": "#ffc88a",
+    "motif_emoji": "📈"
+  },
+
+  "watermark": "DHANDHA DIMAAG",
+  "music_mood": "cinematic build / motivational",
+  "posting_times_ist": ["13:00", "20:30"],
+
+  "seo": {
+    "title_suffix": " #shorts",
+    "description_footer": "Business aur startup ki kahaniyan + lessons ke liye Dhandha Dimaag follow karo 📈\n\nDisclaimer: Educational + entertainment purpose ke liye.",
+    "default_hashtags": ["#shorts", "#business", "#startup", "#entrepreneur", "#casestudy", "#hindi"],
+    "tags": ["business case study hindi", "startup story hindi", "business lessons", "entrepreneur hindi", "business ideas hindi", "brand story", "business strategy", "company case study", "indian startup", "business motivation"]
+  }
+}

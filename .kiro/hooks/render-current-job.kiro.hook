@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Render Current Job File",
+  "description": "Click to render a video from a job file. When triggered, asks the agent to find the most recently edited job file under channels/*/jobs/ and run make_video.py on it. Reports progress as the render proceeds.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Render a Short from the most recently modified job file. Steps:\n1. Find the job file: search channels/*/jobs/*.json and pick the one with the latest mtime.\n2. Run: python scripts/make_video.py --job &lt;that path&gt;\n3. Start it as a BACKGROUND process (it takes 5-7 minutes).\n4. Poll the process output every minute or so and report progress to the user (voice -> whisper -> beats -> pexels -> render -> normalize).\n5. When done, print the absolute path to output.mp4 and its duration/size.\n6. Do NOT auto-upload. The user reviews first."
+  }
+}

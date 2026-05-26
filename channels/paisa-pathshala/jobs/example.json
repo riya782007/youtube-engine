@@ -1,0 +1,15 @@
+{
+  "channel": "paisa-pathshala",
+  "title": "50-30-20 rule: salary ko aise baanto",
+  "description": "Paise ki sabse simple planning. Educational purpose ke liye.",
+  "hashtags": ["#paisa", "#savings", "#budgeting", "#moneytips"],
+  "music": "music/bgm.mp3",
+  "voice": "Salary aati hai... aur do hafte mein gayab? Ek simple rule isse fix kar sakta hai - pachaas, tees, bees. Apni income ke pachaas percent zaroori kharchon mein - ghar, khaana, bills. Tees percent apni masti mein - shopping, ghoomna, bahar khaana. Aur bees percent? Sabse pehle sirf savings aur investing ke liye. Bas itna karo, har mahine. Paise ki aisi hi clear baatein chahiye toh Paisa Pathshala ko follow karo.",
+  "captions": [
+    { "icon": "💸", "kicker": "SACH HAI", "line": "Salary *2 hafte* me gayab?", "broll": "counting cash money rupees" },
+    { "icon": "🧮", "kicker": "RULE", "line": "Yaad rakho: *50-30-20*", "broll": "calculator finance planning desk" },
+    { "icon": "🏠", "kicker": "50%", "line": "Zaroorat\nghar, khaana, bills", "broll": "grocery shopping paying bills" },
+    { "icon": "🛍️", "kicker": "30%", "line": "Masti\nshopping, ghoomna", "broll": "shopping bags mall lifestyle" },
+    { "icon": "🪙", "kicker": "20%", "line": "Sirf **savings** aur invest", "broll": "saving money piggy bank investment" }
+  ]
+}

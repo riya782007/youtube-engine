@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "Validate Job File on Save",
+  "description": "When any channels/*/jobs/*.json file is saved, validate it: check JSON parses, required fields present (channel, title, voice, captions), captions array is 1-5, channel folder exists, broll terms are in English. Report issues inline so the user fixes them before rendering.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "channels/*/jobs/*.json",
+      "channels/**/jobs/**/*.json"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A job file was just saved. Validate it without running anything heavy:\n\n1. Read the file. Check it parses as valid JSON.\n2. Required fields: channel, title, voice (string), captions (array, 1-5 items).\n3. For each caption verify: kicker, line, icon, broll all exist. Line should be ≤ 6 words. Broll term should look English (Pexels searches English).\n4. Verify channels/&lt;channel&gt;/ folder exists.\n5. Voice script should be Hinglish (mixed Hindi + English) - flag if it looks like pure English or pure Hindi only.\n6. Voice script length: aim for 100-300 chars (12-25 sec spoken). Flag if outside this.\n7. If everything is fine, respond with a short ✅ summary (channel, title, caption count, estimated duration).\n8. If issues exist, list them with line numbers / fix suggestions. Be brief.\n\nDo NOT modify the file. Do NOT run the render. Just validate and report."
+  }
+}

@@ -1,0 +1,17 @@
+# Secrets - NEVER commit these
+.env
+client_secret.json
+youtube_token.json
+*.token
+
+# Generated media
+**/renders/**
+*.wav
+*.mp4
+*.mp3
+
+# Python / Node
+__pycache__/
+*.pyc
+node_modules/
+*.log

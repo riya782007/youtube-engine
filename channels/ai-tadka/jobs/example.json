@@ -1,0 +1,15 @@
+{
+  "channel": "ai-tadka",
+  "title": "ChatGPT se 2 minute me professional resume",
+  "description": "Resume banane ka sabse fast tareeka. Try karke comment me batao!",
+  "hashtags": ["#ai", "#chatgpt", "#resume", "#careertips"],
+  "music": "music/bgm.mp3",
+  "voice": "Resume banane mein ghante lag rahe hain? Ruko... ek AI trick hai jo do minute mein kaam khatam kar deti hai. ChatGPT kholo, apni saari details daalo, aur likho - ATS-friendly resume banao. Bas! Ab ek baar review karo, thoda apne hisaab se edit karo, aur professional resume taiyaar. Aise hi roz ek naya AI hack chahiye? Toh AI Tadka ko abhi follow karo.",
+  "captions": [
+    { "icon": "🤯", "kicker": "RUKO", "line": "Resume pe *ghante* mat lagao", "broll": "stressed person working late laptop" },
+    { "icon": "🤖", "kicker": "STEP 1", "line": "ChatGPT me apni *details* daalo", "broll": "typing on laptop keyboard closeup" },
+    { "icon": "⌨️", "kicker": "STEP 2", "line": "Likho: *ATS-friendly resume*", "broll": "futuristic artificial intelligence technology" },
+    { "icon": "✏️", "kicker": "STEP 3", "line": "Review karo, **edit** karo", "broll": "reading documents at office desk" },
+    { "icon": "✅", "kicker": "DONE", "line": "*2 minute* me resume ready", "broll": "happy professional smiling office" }
+  ]
+}
