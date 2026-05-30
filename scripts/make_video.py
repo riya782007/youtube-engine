@@ -199,6 +199,43 @@ def compute_caption_timings(n_captions, total, custom_starts=None):
     return timings
 
 
+def caption_word_offsets(line, start, end, words):
+    """Per-word reveal offsets (relative to the scene start) that LAND ON real
+    voiceover word onsets, so the caption text animates in sync with the speech.
+
+    Captions are short summaries, not the verbatim transcript, so we don't try to
+    string-match. Instead we spread the caption's words evenly across the scene's
+    spoken window, then SNAP each target to the nearest real spoken-word onset
+    (from Whisper). The eye then sees each word pop exactly as a word is heard.
+
+    Fallback (no Whisper words available): an even stagger across the first ~70%
+    of the on-screen window. Returns a list of floats (seconds, >= 0)."""
+    toks = [t for t in re.split(r"\s+", (line or "").strip()) if t]
+    n = len(toks)
+    if n == 0:
+        return []
+    window = max(0.4, float(end) - float(start))
+    onsets = sorted(w["start"] for w in (words or [])
+                    if (start - 0.05) <= w["start"] < (end - 0.10))
+    offsets = []
+    if onsets:
+        for k in range(n):
+            target = start + (k / n) * window * 0.8   # finish reveals by ~80% of the scene
+            nearest = min(onsets, key=lambda t: abs(t - target))
+            offsets.append(round(max(0.0, nearest - start), 2))
+    else:
+        span = window * 0.7
+        step = max(0.12, min(0.30, span / max(1, n)))
+        offsets = [round(min(span, k * step), 2) for k in range(n)]
+    # keep reveals monotonic, with a readable minimum gap, and inside the window
+    for k in range(1, n):
+        if offsets[k] < offsets[k - 1] + 0.08:
+            offsets[k] = round(offsets[k - 1] + 0.08, 2)
+    cap = round(window - 0.10, 2)
+    offsets = [min(o, cap) for o in offsets]
+    return offsets
+
+
 def fill_template(template_path, tokens):
     with open(template_path, "r", encoding="utf-8") as f:
         htmltext = f.read()
@@ -516,11 +553,16 @@ def main():
         start, dur = timings[i]
         cap = captions[i] if i < len(captions) else {"kicker": "", "line": "", "icon": ""}
         icon = cap.get("icon", DEFAULT_ICONS[i] if i < len(DEFAULT_ICONS) else "")
+        line = cap.get("line", "")
         tokens[f"CAP{i+1}_AT"] = start
         tokens[f"CAP{i+1}_LEN"] = dur
         tokens[f"CAP{i+1}_ICON"] = (icon or "").strip()
         tokens[f"CAP{i+1}_KICKER"] = markup_to_html(cap.get("kicker", ""))
-        tokens[f"CAP{i+1}_LINE"] = markup_to_html(cap.get("line", ""))
+        tokens[f"CAP{i+1}_LINE"] = markup_to_html(line)
+        # voiceover-synced per-word reveal times (relative to this scene's start)
+        tokens[f"CAP{i+1}_WORDTIMES"] = json.dumps(
+            caption_word_offsets(line, start, start + dur, words) if dur > 0 else []
+        )
 
     index_html = fill_template(template_path, tokens)
     with open(os.path.join(work, "index.html"), "w", encoding="utf-8") as f:

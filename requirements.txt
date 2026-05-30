@@ -1,6 +1,14 @@
 # Core (needed now, for voice + orchestration)
 requests>=2.31.0
 
+# Caption <-> voiceover SYNC and beat-synced cuts (strongly recommended).
+# - faster-whisper gives per-word voiceover timestamps so on-screen text animates
+#   exactly when each word is spoken. Without it, captions fall back to even-spread.
+# - librosa detects the music's beats so scene cuts snap to the rhythm.
+# These are heavier installs (first run also downloads a ~470MB Whisper model).
+faster-whisper>=1.0.0
+librosa>=0.10.0
+
 # YouTube upload (install only when we wire uploads)
 google-api-python-client>=2.100.0
 google-auth-oauthlib>=1.2.0
