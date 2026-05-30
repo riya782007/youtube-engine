@@ -1,16 +1,27 @@
 {
   "name": "Dhandha Dimaag",
   "handle": "@DhandhaDimaag",
-  "tagline": "Har business ke peeche ka dimaag",
-  "niche": "Business & startup stories / lessons (Hinglish)",
-  "_note": "Check name + handle availability on YouTube before creating. Verify facts/numbers in every story script before rendering.",
+  "tagline": "AI se business ka dimaag - smarter, faster, sasta",
+  "niche": "Business with AI (Hinglish) - using AI tools to start, run and scale a business: automation, marketing, ops and AI startup ideas for India",
+  "_note": "PILLAR 3 of the AI trio: BUSINESS WITH AI. Practical, founder-focused. Verify any real numbers/claims before rendering. Keep visually distinct (orange/cinematic, authoritative narrator) from the other two channels.",
+
+  "content_pillars": [
+    "AI tools that run a business (marketing, sales, support, content, ops)",
+    "Automate a boring business task with AI in minutes",
+    "AI startup / business ideas with low investment",
+    "How small Indian businesses can use AI to cut cost & grow",
+    "AI agents & workflows for solopreneurs",
+    "Case-style breakdowns: 'is business ne AI se yeh kiya' (verify facts)"
+  ],
 
   "voice": {
     "channel_preset": "business",
     "speaker": "manan",
-    "pace": 1.0,
-    "temperature": 0.6,
-    "lang": "hi-IN"
+    "pace": 1.02,
+    "temperature": 0.62,
+    "lang": "hi-IN",
+    "_speaker_options_to_try": ["manan", "anand", "ratan", "advait", "aditya"],
+    "_note": "manan = authoritative narrator male (best for business storytelling). pace 1.02 keeps momentum without losing gravitas."
   },
 
   "theme": {
@@ -25,12 +36,13 @@
 
   "watermark": "DHANDHA DIMAAG",
   "music_mood": "cinematic build / motivational",
+  "jamendo_music_tags": "cinematic motivational inspiring epic",
   "posting_times_ist": ["13:00", "20:30"],
 
   "seo": {
     "title_suffix": " #shorts",
-    "description_footer": "Business aur startup ki kahaniyan + lessons ke liye Dhandha Dimaag follow karo 📈\n\nDisclaimer: Educational + entertainment purpose ke liye.",
-    "default_hashtags": ["#shorts", "#business", "#startup", "#entrepreneur", "#casestudy", "#hindi"],
-    "tags": ["business case study hindi", "startup story hindi", "business lessons", "entrepreneur hindi", "business ideas hindi", "brand story", "business strategy", "company case study", "indian startup", "business motivation"]
+    "description_footer": "AI se business chalane aur badhane ke smart tareeke ke liye Dhandha Dimaag follow karo 📈\n\nApne business me kaunsa AI use karoge? Comment me batao.\n\nDisclaimer: Educational + entertainment purpose ke liye.",
+    "default_hashtags": ["#shorts", "#business", "#aitools", "#aiforbusiness", "#startup", "#automation", "#hindi"],
+    "tags": ["ai for business", "business with ai", "ai business ideas hindi", "ai automation business", "startup ideas india", "ai tools for business", "small business ai", "ai marketing tools", "entrepreneur ai hindi", "scale business with ai", "ai startup india", "business automation hindi", "ai agents business", "low investment business ai", "ai business 2026"]
   }
 }

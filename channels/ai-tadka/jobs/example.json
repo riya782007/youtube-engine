@@ -1,15 +1,22 @@
 {
   "channel": "ai-tadka",
-  "title": "ChatGPT se 2 minute me professional resume",
-  "description": "Resume banane ka sabse fast tareeka. Try karke comment me batao!",
-  "hashtags": ["#ai", "#chatgpt", "#resume", "#careertips"],
+  "title": "ChatGPT hidden feature that builds anything fast",
+  "description": "Yeh ChatGPT trick 99% logon ko nahi pata. Aaj try karo!",
+  "hashtags": ["#shorts", "#ai", "#chatgpt", "#aitools", "#aihindi"],
   "music": "music/bgm.mp3",
-  "voice": "Resume banane mein ghante lag rahe hain? Ruko... ek AI trick hai jo do minute mein kaam khatam kar deti hai. ChatGPT kholo, apni saari details daalo, aur likho - ATS-friendly resume banao. Bas! Ab ek baar review karo, thoda apne hisaab se edit karo, aur professional resume taiyaar. Aise hi roz ek naya AI hack chahiye? Toh AI Tadka ko abhi follow karo.",
+  "voice": "Ruko... ChatGPT ka ek feature aisa hai jo tumhara aadha kaam khatam kar deta hai, aur logon ko pata hi nahi. Sun lo, last wala step sabse zaroori hai. ChatGPT kholo, upar Explore GPTs pe jaao. Yahan ready-made AI assistants milte hain, har kaam ke liye alag. Resume banana hai? Ek GPT hai. Presentation? Uske liye bhi. Apna kaam likho, aur woh expert AI sirf wahi kaam karega, bahut behtar quality me. Bonus tip... apni files upload karke usse personal banao. Bas teen minute me kaam done. Aise hi roz ek naya AI hack chahiye? AI Tadka ko abhi follow karo.",
   "captions": [
-    { "icon": "🤯", "kicker": "RUKO", "line": "Resume pe *ghante* mat lagao", "broll": "stressed person working late laptop" },
-    { "icon": "🤖", "kicker": "STEP 1", "line": "ChatGPT me apni *details* daalo", "broll": "typing on laptop keyboard closeup" },
-    { "icon": "⌨️", "kicker": "STEP 2", "line": "Likho: *ATS-friendly resume*", "broll": "futuristic artificial intelligence technology" },
-    { "icon": "✏️", "kicker": "STEP 3", "line": "Review karo, **edit** karo", "broll": "reading documents at office desk" },
-    { "icon": "✅", "kicker": "DONE", "line": "*2 minute* me resume ready", "broll": "happy professional smiling office" }
+    { "icon": "🤯", "kicker": "RUKO", "line": "Yeh feature *chhupa* hai", "broll": "person shocked looking at laptop" },
+    { "icon": "🔓", "kicker": "SACH", "line": "99% ko *nahi pata*", "broll": "glowing ai brain interface" },
+    { "icon": "⏳", "kicker": "WAIT", "line": "Last step *zaroori*", "broll": "hourglass time ticking closeup" },
+    { "icon": "🤖", "kicker": "STEP 1", "line": "ChatGPT *kholo*", "broll": "opening chatgpt on screen" },
+    { "icon": "🧭", "kicker": "STEP 2", "line": "Explore *GPTs*", "broll": "navigating app menu interface" },
+    { "icon": "🗂️", "kicker": "MILEGA", "line": "Har kaam *alag AI*", "broll": "futuristic dashboard many apps" },
+    { "icon": "📄", "kicker": "EXAMPLE", "line": "Resume? *Ready GPT*", "broll": "professional resume on laptop" },
+    { "icon": "📊", "kicker": "EXAMPLE", "line": "Presentation *bhi*", "broll": "presentation slides on screen" },
+    { "icon": "🎯", "kicker": "KAAM", "line": "Likho, AI *karega*", "broll": "typing prompt into computer" },
+    { "icon": "📎", "kicker": "BONUS", "line": "Files *upload* karo", "broll": "uploading documents to cloud" },
+    { "icon": "⚡", "kicker": "3 MIN", "line": "Kaam *done*", "broll": "fast motion productivity desk" },
+    { "icon": "✅", "kicker": "RESULT", "line": "Aadha kaam *khatam*", "broll": "happy person celebrating laptop" }
   ]
 }

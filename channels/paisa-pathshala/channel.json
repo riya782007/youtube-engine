@@ -1,16 +1,27 @@
 {
   "name": "Paisa Pathshala",
   "handle": "@PaisaPathshala",
-  "tagline": "Paise ki samajh, simple Hindi me",
-  "niche": "Personal finance & money skills (Hinglish)",
-  "_note": "Check name + handle availability on YouTube before creating. EDUCATION ONLY - never give specific buy/sell advice (policy + trust).",
+  "tagline": "AI se paisa kamao - online income ke smart tareeke",
+  "niche": "Making money with AI (Hinglish) - AI side-hustles, online income ideas, AI freelancing and passive-income workflows for Indians",
+  "_note": "PILLAR 2 of the AI trio: MONEY-MAKING WITH AI. Education + ideas only, NOT financial/investment advice and NOT 'get rich quick'. Frame every idea as a real, doable workflow. Keep visually distinct (green/gold, calm-confident) from the other two channels.",
+
+  "content_pillars": [
+    "AI side hustles you can start today (content, design, writing, voiceover)",
+    "Earn online with AI tools - freelancing gigs, Fiverr/Upwork with AI",
+    "Faceless content / digital products made with AI",
+    "AI automation that saves time = saves money",
+    "'Yeh AI skill ki demand badh rahi hai' - skills that pay",
+    "Real numbers: realistic earning ranges, effort and time needed (no hype)"
+  ],
 
   "voice": {
     "channel_preset": "finance",
     "speaker": "shreya",
-    "pace": 1.0,
-    "temperature": 0.55,
-    "lang": "hi-IN"
+    "pace": 1.02,
+    "temperature": 0.6,
+    "lang": "hi-IN",
+    "_speaker_options_to_try": ["shreya", "vidya", "priya", "neha", "kavya"],
+    "_note": "shreya = warm, trustworthy female (credibility for money topics). Slightly faster pace 1.02 keeps energy up for hustle/earning content while staying clear."
   },
 
   "theme": {
@@ -20,17 +31,18 @@
     "accent2": "#2ecc71",
     "text": "#ffffff",
     "kicker": "#7fe0a8",
-    "motif_emoji": "🪙"
+    "motif_emoji": "💰"
   },
 
   "watermark": "PAISA PATHSHALA",
-  "music_mood": "calm confident lo-fi / corporate",
+  "music_mood": "confident motivational lo-fi / future-corporate",
+  "jamendo_music_tags": "corporate motivational positive uplifting",
   "posting_times_ist": ["13:00", "20:30"],
 
   "seo": {
     "title_suffix": " #shorts",
-    "description_footer": "Paise ki samajh badhane ke liye Paisa Pathshala follow karo 💰\n\nDisclaimer: Yeh sirf educational content hai, financial advice nahi. Apne nivesh se pehle kisi SEBI-registered advisor se baat karein.",
-    "default_hashtags": ["#shorts", "#finance", "#personalfinance", "#paisa", "#moneytips", "#hindi"],
-    "tags": ["personal finance hindi", "money management hindi", "paise kaise bachaye", "saving tips hindi", "financial literacy", "money psychology", "budgeting hindi", "smart money", "financial education", "paisa management"]
+    "description_footer": "AI se paise kamane ke smart aur honest tareeke seekhne ke liye Paisa Pathshala follow karo 💰\n\nKaunsa AI side hustle try karoge? Comment me batao.\n\nDisclaimer: Yeh educational content hai, koi guaranteed income ya financial advice nahi. Mehnat aur consistency zaroori hai.",
+    "default_hashtags": ["#shorts", "#makemoneyonline", "#aitools", "#sidehustle", "#earnwithai", "#passiveincome", "#hindi"],
+    "tags": ["make money with ai", "ai se paise kaise kamaye", "earn money online india", "ai side hustle", "online income ideas hindi", "ai freelancing", "passive income india", "work from home ai", "ai skills high demand", "money making ai tools", "digital income hindi", "ai business ideas", "earn online with ai", "side hustle india 2026", "ai income"]
   }
 }

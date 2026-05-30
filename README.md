@@ -3,13 +3,14 @@
 One job file in → a finished, captioned, voiced vertical Short out.
 Built on **Hyperframes** (HTML → MP4) + **Sarvam AI** (Hindi/Hinglish voice).
 
-Three channels, each high-RPM and faceless-friendly:
+Three AI-focused channels, each a different high-RPM angle (kept distinct to stay clear of
+YouTube's duplicate-content rules):
 
 | Folder | Channel | Niche | Voice |
 |---|---|---|---|
-| `channels/ai-tadka` | AI Tadka 🤖 | AI tools & how-to | rohan |
-| `channels/paisa-pathshala` | Paisa Pathshala 🪙 | Personal finance (education only) | shreya |
-| `channels/dhandha-dimaag` | Dhandha Dimaag 📈 | Business & startup stories | manan |
+| `channels/ai-tadka` | AI Tadka 🤖 | AI tools, hacks & how-to | aditya |
+| `channels/paisa-pathshala` | Paisa Pathshala 💰 | Making money with AI (side hustles / online income) | shreya |
+| `channels/dhandha-dimaag` | Dhandha Dimaag 📈 | Business with AI (automation / startup ideas) | manan |
 
 ---
 
@@ -151,10 +152,11 @@ youtube engine/
 
 - **Never paste API keys in chat or commit them.** Keys live only in `.env` /
   `client_secret.json`, both gitignored. Rotate any key that's been exposed.
-- **Finance channel = education only.** No specific buy/sell calls (policy + trust).
-- **Business channel = verify every fact/number** before rendering.
-- **Vary content per channel** to stay clear of YouTube's "inauthentic content"
-  rules — different voices, themes, and angles are already set up for you.
+- **Money channel (Paisa Pathshala) = ideas + education, not advice.** Show real, doable
+  AI side-hustles; never promise guaranteed income, and no investment/stock/crypto calls.
+- **Business channel (Dhandha Dimaag) = verify any real number/claim** before rendering.
+- **All three are AI-focused but kept distinct** (different voices, themes, angles) to stay
+  clear of YouTube's "inauthentic/duplicate content" rules — this is already set up for you.
 - Upload defaults to **private** so you always get the final say.
 
 ---

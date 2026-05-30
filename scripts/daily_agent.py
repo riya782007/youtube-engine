@@ -83,44 +83,54 @@ import generate_script  # noqa: E402
 
 CHANNELS = ("ai-tadka", "paisa-pathshala", "dhandha-dimaag")
 
-# Trend search queries per channel - tuned to surface high-engagement Indian content.
+# Trend search queries per channel - all three channels are AI-centric but
+# target a DIFFERENT angle so the videos never look like duplicate content:
+#   ai-tadka         -> AI TOOLS & how-to
+#   paisa-pathshala  -> MAKE MONEY with AI (side hustles / online income)
+#   dhandha-dimaag   -> BUSINESS with AI (automation / startup ideas)
 TREND_QUERIES = {
     "ai-tadka": [
-        "ChatGPT trick India hindi",
-        "AI tool productivity India",
-        "Gemini AI feature India",
-        "NotebookLM Perplexity India",
-        "AI image prompt viral India",
+        "new AI tool launched 2026",
+        "ChatGPT new feature trick",
+        "best free AI tools productivity",
+        "Gemini Claude Perplexity AI update",
+        "AI image video tool viral India",
+        "underrated AI tool nobody knows",
     ],
     "paisa-pathshala": [
-        "tax saving 80C India hindi",
-        "SIP investment hack India",
-        "credit card cashback trick India",
-        "salary saving mistake India",
-        "EPF NPS PPF India tips",
+        "make money with AI side hustle 2026",
+        "earn money online AI tools India",
+        "AI freelancing income skill",
+        "passive income AI digital product",
+        "AI side hustle beginners no investment",
+        "high demand AI skill jobs India",
     ],
     "dhandha-dimaag": [
-        "indian startup founder story 2026",
-        "indian D2C brand growth secret",
-        "small business idea India hindi",
-        "indian unicorn business model",
-        "Zerodha Zoho Boat business strategy",
+        "AI tools for business 2026",
+        "AI automation small business India",
+        "AI startup idea low investment",
+        "AI agents for entrepreneurs",
+        "business using AI to grow case study",
+        "AI marketing tool for business",
     ],
 }
 
 # Per-channel keywords that MUST appear (lowercase) for a topic to qualify.
 # Filters out politics / cricket / unrelated headlines that Google News surfaces.
+# Every channel REQUIRES an AI signal (the whole network is AI-focused now), plus
+# its own angle keywords.
+_AI_SIGNALS = ("ai", "a.i", "chatgpt", "gpt", "gemini", "claude", "openai",
+               "perplexity", "notebooklm", "midjourney", "sora", "runway",
+               "copilot", "deepseek", "llm", "generative", "automation", "agent",
+               "machine learning", "prompt", "ai tool", "artificial intelligence")
 REQUIRED_KEYWORDS = {
-    "ai-tadka": ("ai", "chatgpt", "gemini", "claude", "openai", "perplexity",
-                 "notebooklm", "midjourney", "tool", "prompt", "automation",
-                 "machine learning", "deepseek"),
-    "paisa-pathshala": ("tax", "sip", "investment", "salary", "saving", "epf",
-                        "ppf", "nps", "credit card", "cashback", "money",
-                        "income", "mutual fund", "finance", "personal finance",
-                        "share market", "stock"),
-    "dhandha-dimaag": ("startup", "founder", "business", "brand", "company",
-                       "ipo", "valuation", "ceo", "entrepreneur", "d2c",
-                       "unicorn", "venture", "small business"),
+    "ai-tadka": _AI_SIGNALS + ("tool", "feature", "trick", "hack", "app"),
+    "paisa-pathshala": _AI_SIGNALS + ("earn", "money", "income", "side hustle",
+                        "freelanc", "passive", "online", "gig", "skill", "sell",
+                        "side income", "kamao", "kamaye", "rupees", "salary"),
+    "dhandha-dimaag": _AI_SIGNALS + ("business", "startup", "founder", "brand",
+                        "entrepreneur", "marketing", "sales", "company", "scale",
+                        "small business", "d2c", "automate", "ops", "workflow"),
 }
 
 
@@ -240,6 +250,84 @@ def _reframe_topic(headline, channel_id):
     # Remove obvious news boilerplate.
     headline = re.sub(r"\s*[-–|]\s*[^-–|]+$", "", headline).strip()
     return headline
+
+
+# ---------------------------------------------------------------- topic history (anti-repeat)
+# Remember what each channel has already covered so we never email the same idea
+# twice in a short window. Stored as a small JSON file under scripts/state/.
+STATE_DIR = os.path.join(SCRIPT_DIR, "state")
+TOPIC_HISTORY_PATH = os.path.join(STATE_DIR, "used_topics.json")
+HISTORY_WINDOW_DAYS = 21          # don't repeat a topic within this many days
+HISTORY_KEEP = 120                # cap stored entries per channel
+
+
+def _normalize_topic(title):
+    """Lowercase, strip punctuation, drop tiny filler words -> a comparable signature."""
+    t = re.sub(r"[^a-z0-9\s]", " ", (title or "").lower())
+    stop = {"the", "a", "an", "to", "for", "of", "in", "on", "with", "your",
+            "you", "how", "this", "that", "and", "is", "are", "ka", "ki", "ke",
+            "me", "se", "hai", "ko", "ye", "yeh", "kya", "kaise"}
+    toks = [w for w in t.split() if w and w not in stop]
+    return set(toks)
+
+
+def _load_topic_history():
+    try:
+        with open(TOPIC_HISTORY_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_topic_history(hist):
+    try:
+        os.makedirs(STATE_DIR, exist_ok=True)
+        with open(TOPIC_HISTORY_PATH, "w", encoding="utf-8") as f:
+            json.dump(hist, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"[history] could not save topic history: {e}")
+
+
+def _recent_topic_signatures(channel_id, hist=None):
+    """Return list of token-sets used by this channel within the recent window."""
+    hist = hist if hist is not None else _load_topic_history()
+    cutoff = dt.datetime.now() - dt.timedelta(days=HISTORY_WINDOW_DAYS)
+    sigs = []
+    for entry in hist.get(channel_id, []):
+        try:
+            when = dt.datetime.fromisoformat(entry.get("date", ""))
+        except Exception:
+            when = dt.datetime.now()
+        if when >= cutoff:
+            sigs.append(set(entry.get("tokens", [])))
+    return sigs
+
+
+def _is_recent_duplicate(title, recent_sigs, overlap_ratio=0.6):
+    """True if `title` shares >= overlap_ratio of its keywords with a recent topic."""
+    sig = _normalize_topic(title)
+    if not sig:
+        return False
+    for old in recent_sigs:
+        if not old:
+            continue
+        inter = len(sig & old)
+        if inter and inter / max(1, min(len(sig), len(old))) >= overlap_ratio:
+            return True
+    return False
+
+
+def _record_topic(channel_id, title):
+    hist = _load_topic_history()
+    bucket = hist.setdefault(channel_id, [])
+    bucket.append({
+        "date": dt.datetime.now().isoformat(timespec="seconds"),
+        "title": title,
+        "tokens": sorted(_normalize_topic(title)),
+    })
+    # keep the list bounded
+    hist[channel_id] = bucket[-HISTORY_KEEP:]
+    _save_topic_history(hist)
 
 
 # ---------------------------------------------------------------- env
@@ -377,6 +465,18 @@ def research_topic_for_channel(channel_id):
     for s, t, src, _ in scored[:5]:
         _safe_print(f"  {s:3d}  {src:7s}  {t[:80]}")
 
+    # Anti-repeat: drop candidates too similar to what this channel already
+    # covered in the last HISTORY_WINDOW_DAYS. If filtering wipes everything out
+    # (rare), fall back to the full list so a video is still produced.
+    recent_sigs = _recent_topic_signatures(channel_id)
+    fresh = [row for row in scored if not _is_recent_duplicate(row[1], recent_sigs)]
+    if fresh:
+        if len(fresh) < len(scored):
+            _safe_print(f"[trends] {channel_id}: skipped {len(scored) - len(fresh)} recently-used topic(s)")
+        scored = fresh
+    else:
+        _safe_print(f"[trends] {channel_id}: all candidates were recent repeats - using best anyway")
+
     # Pick the highest-scoring.
     chosen = None
     for s, t, src, reasons in scored:
@@ -393,6 +493,7 @@ def research_topic_for_channel(channel_id):
 
     score, title, source, reasons = chosen
     title = _reframe_topic(title, channel_id)
+    _record_topic(channel_id, title)
     bucket = ("CREATE" if score >= 80 else "TEST" if score >= 65 else "WEAK")
     _safe_print(f"[trends] {channel_id} -> [{bucket} score={score}] {title}")
     return title, score, reasons
@@ -690,6 +791,50 @@ def send_email(results, smtp_server="smtp.gmail.com", smtp_port=465):
         return False
 
 
+# ---------------------------------------------------------------- preflight
+def preflight():
+    """Print a clear status of every key the daily run uses. Non-blocking: the
+    pipeline degrades gracefully, but this makes the 11 AM log instantly readable
+    so you know exactly what's active and what (optionally) to add."""
+    def have(name):
+        return "OK " if _load_env_value(name) else "-- "
+
+    # at least one LLM is REQUIRED for script generation
+    llm_keys = ("GROQ_API_KEY", "GEMINI_API_KEY", "ANTHROPIC_API_KEY", "BLUESMINDS_API_KEY")
+    has_llm = any(_load_env_value(k) for k in llm_keys)
+
+    print("========== PREFLIGHT ==========")
+    print("Script LLM (need >=1):")
+    for k in llm_keys:
+        print(f"  [{have(k)}] {k}")
+    print("Voice / media:")
+    for k in ("ELEVENLABS_API_KEY", "SARVAM_API_KEY", "PEXELS_API_KEY",
+              "FREESOUND_API_KEY", "JAMENDO_CLIENT_ID"):
+        note = ""
+        if k == "ELEVENLABS_API_KEY":
+            note = "  (best Hinglish voice; falls back to Sarvam if absent)"
+        if k == "SARVAM_API_KEY":
+            note = "  (REQUIRED voice fallback)"
+        if k == "JAMENDO_CLIENT_ID":
+            note = "  (auto BGM; else uses channels/<id>/music/bgm.mp3)"
+        print(f"  [{have(k)}] {k}{note}")
+    print("Email delivery:")
+    for k in ("AGENT_EMAIL_FROM", "AGENT_EMAIL_TO", "AGENT_EMAIL_APP_PASSWORD"):
+        print(f"  [{have(k)}] {k}")
+    print("===============================")
+
+    if not has_llm:
+        print("[preflight] WARNING: no LLM key found - scripts cannot be generated. "
+              "Add GROQ_API_KEY (free) to .env. See AGENT_SETUP.md.")
+    if not (_load_env_value("SARVAM_API_KEY") or _load_env_value("ELEVENLABS_API_KEY")):
+        print("[preflight] WARNING: no voice key (SARVAM_API_KEY / ELEVENLABS_API_KEY) - "
+              "voiceover will fail. Add at least SARVAM_API_KEY.")
+    if not all(_load_env_value(k) for k in ("AGENT_EMAIL_FROM", "AGENT_EMAIL_TO", "AGENT_EMAIL_APP_PASSWORD")):
+        print("[preflight] NOTE: email keys incomplete - videos will still render, "
+              "but no summary email will be sent. See AGENT_SETUP.md Step 2.")
+    return has_llm
+
+
 # ---------------------------------------------------------------- main
 def main():
     ap = argparse.ArgumentParser(description="Daily autonomous Shorts producer.")
@@ -698,6 +843,10 @@ def main():
     ap.add_argument("--no-email", action="store_true", help="Skip email step.")
     ap.add_argument("--only", choices=CHANNELS, help="Only run one channel.")
     args = ap.parse_args()
+
+    started = dt.datetime.now()
+    print(f"\n########## DAILY AGENT RUN {started.strftime('%Y-%m-%d %H:%M:%S')} ##########")
+    preflight()
 
     channels = (args.only,) if args.only else CHANNELS
     results = []
@@ -713,11 +862,15 @@ def main():
             results.append({"channel": ch, "error": str(e)})
 
     print("\n========== SUMMARY ==========")
+    ok = 0
     for r in results:
         if r.get("error"):
             print(f"  {r['channel']}: ERROR - {r['error']}")
         else:
+            ok += 1
             print(f"  {r['channel']}: OK -> {r.get('output_mp4', r.get('job_path','?'))}")
+    elapsed = (dt.datetime.now() - started).total_seconds()
+    print(f"  {ok}/{len(results)} channel(s) succeeded in {elapsed/60:.1f} min.")
 
 
 if __name__ == "__main__":

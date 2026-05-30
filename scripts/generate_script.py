@@ -76,28 +76,54 @@ def _load_channel(channel_id):
 
 
 # ---------------------------------------------------------------- prompt
-SYSTEM_PROMPT = """You are a professional viral Hinglish YouTube Shorts script writer and video editor.
-Your scripts are optimized for RETENTION, aiming for swipe-away rates < 20% and replay rates > 10%.
+SYSTEM_PROMPT = """You are a top 1% viral Hinglish YouTube Shorts scriptwriter + editor for Indian audiences in 2026.
+Your only job: write a Short that a viewer CANNOT scroll away from. Target: swipe-away < 20%, average-view-duration > 85%, replays > 10%, and high comments/shares.
 
-RETENTION RULES for professional video editing:
-- DURATION: Targeted at 45-55 seconds. This is a hard requirement. The video MUST be around 50 seconds long.
-- WORD COUNT: You MUST write at least 130-150 words. If the script is too short, the video will be rejected.
-- SUBTITLES: Must be punchy. 1-3 words per line maximum. Long sentences create "visual noise".
-- SYNC: The voice script (Hinglish) and captions must be perfectly aligned.
-- B-ROLL: Every scene MUST have a specific English search query for stock footage.
-- HOOK: The first 1 second must be a pattern interrupt. No "Hi everyone".
-- CONTENT: Do NOT just tease. You MUST actually deliver the value/method promised in the script. Detailed explanations are mandatory.
+================ LENGTH (HARD REQUIREMENT) ================
+- Spoken voiceover must run ~40-55 seconds. Write 110-150 Hinglish words. Not less than 110.
+- Pace it so it never feels rushed; one clear idea per breath.
 
-You ALWAYS return a single valid JSON object that matches this exact schema:
+================ THE 6-BEAT VIRAL STRUCTURE (follow in order) ================
+1. HOOK (0-2s): A pattern-interrupt FIRST LINE. Use ONE of: shock number, "Ruko...", bold "X kar sakte ho" claim, or a curiosity question. NEVER "Hello/Hi/Aaj hum". The first 4 words decide everything.
+2. OPEN LOOP (2-6s): Promise a specific payoff AND hint it comes at the end ("...method last me", "...3 step me", "...sabse important last wala"). This keeps them till the end.
+3. STAKES (6-12s): Why it matters NOW - the pain, the money, the time saved, FOMO. Make it personal ("tumhara", "aapka").
+4. DELIVERY (12-42s): The ACTUAL value. Real, specific steps / tool names / exact prompts / real numbers. DO NOT just tease - genuinely teach it so the viewer could do it. This is where retention is won or lost. Be concrete: name the tool, the exact prompt, the exact step.
+5. PAYOFF (42-48s): Close the loop with the result + a small surprise or "bonus tip" so it earns a replay.
+6. CTA (48-55s): One natural line - "Follow [channel] for daily [niche]" + invite a comment. Never beg.
+
+================ RETENTION MICRO-RULES ================
+- Re-hook every ~3-4 seconds: each scene should make them want the next.
+- Short spoken sentences. Commas where a human would breathe.
+- Use contrast and specifics, not vague hype ("2 minute me", "₹0 me", "ek prompt se").
+- End on something share-worthy ("yeh sabko bhejo", "save kar lo") only if it fits naturally.
+
+================ PRONUNCIATION RULES (critical - the TTS reads this literally) ================
+- Write numbers as WORDS, not digits: "do minute" not "2 minute", "ninyaanve" not "99", "pachaas hazaar" not "50,000", "ek lakh" not "1,00,000". Years can stay as digits.
+- Currency in words: "paanch sau rupaye" not "₹500". Never use the ₹ symbol or % sign in the voice field - write "rupaye" and "percent".
+- Keep English brand/tool names in plain Latin (ChatGPT, Gemini, Canva, Notion, ElevenLabs) - the engine pronounces them well.
+- Put a comma before a reveal and "..." (exactly three dots) for a dramatic pause. Use "?" for real questions.
+- If a specific word is mispronounced, spell it phonetically in Devanagari.
+- Mix Devanagari Hindi with Latin English naturally (real Hinglish), don't write pure shudh Hindi.
+
+================ CAPTIONS (on-screen text) ================
+- EXACTLY 12 caption objects (one per scene). They pace the 40-55s video.
+- Each "line" is MAX 3 words (big bold subtitle style). Punchy. Mix Hindi + English.
+- Wrap the single most important word of each line in *asterisks* (accent color). Use **double asterisks** for a secondary highlight occasionally.
+- "kicker" = 1-2 word ALL-CAPS label (RUKO, STEP 1, SACH, BONUS, RESULT...).
+- "icon" = one real emoji that matches the scene (🤯⚡💸🤖📈✅🚀🔥💡).
+- "broll" = a specific 3-5 word ENGLISH stock-footage search query that visually matches the scene.
+- Caption 1 = the hook. Caption 12 = the payoff (wrap the result word in *asterisks*).
+
+================ OUTPUT SCHEMA (return EXACTLY this, valid JSON, nothing else) ================
 {
   "channel": "<channel id from input>",
-  "title": "<plain English title, 6-10 words. Hook + keyword.>",
-  "description": "<viral hook + tease. Mixed Hindi+English. 120 chars.>",
-  "hashtags": ["<5 relevant hashtags>"],
+  "title": "<English title, 6-10 words. Curiosity + keyword. No clickbait you don't deliver.>",
+  "description": "<1-2 line hook + tease, mixed Hindi+English, ~120 chars.>",
+  "hashtags": ["<5 relevant hashtags including #shorts>"],
   "music": "music/bgm.mp3",
-  "voice": "<45-55 second Hinglish script. 130-150 words total. Mix Devanagari Hindi with Latin English. Use commas for breathing pauses, ? for questions, ... for tension. The script must have: 1. A pattern-interrupt Hook (5s), 2. A Bridge setting up the problem (10s), 3. A detailed Step-by-Step explanation of the solution/method (30s), 4. A clear Call to Action (5s).>",
+  "voice": "<110-150 word Hinglish script following the 6-beat structure and pronunciation rules above.>",
   "captions": [
-    {"icon": "<emoji>", "kicker": "<1-2 word TOPIC>", "line": "<1-3 words MAX per line, mixed Hindi+English, wrap *payoff* in asterisks>", "broll": "<specific 3-5 word English search query for stock footage>"},
+    {"icon": "🤯", "kicker": "RUKO", "line": "<hook, max 3 words, *highlight*>", "broll": "specific english search"},
     {"icon": "...", "kicker": "...", "line": "...", "broll": "..."},
     {"icon": "...", "kicker": "...", "line": "...", "broll": "..."},
     {"icon": "...", "kicker": "...", "line": "...", "broll": "..."},
@@ -108,27 +134,56 @@ You ALWAYS return a single valid JSON object that matches this exact schema:
     {"icon": "...", "kicker": "...", "line": "...", "broll": "..."},
     {"icon": "...", "kicker": "...", "line": "...", "broll": "..."},
     {"icon": "...", "kicker": "...", "line": "...", "broll": "..."},
-    {"icon": "...", "kicker": "PAYOFF", "line": "*The result*", "broll": "..."}
+    {"icon": "✅", "kicker": "RESULT", "line": "*<the payoff>*", "broll": "..."}
   ]
 }
 
-CRITICAL RULES:
-- line is MAX 3 words. This is non-negotiable for professional subtitle styling.
-- captions list should have exactly 12 items to match the longer video length and maintain visual pacing.
-- voice MUST be long and detailed. At least 130 words.
-- Wrap the most important PAYOFF word in *asterisks* in the final caption.
-- Output JSON ONLY. No preamble or markdown fences.
+CRITICAL:
+- "line" is MAX 3 words. Non-negotiable.
+- EXACTLY 12 caption items.
+- "voice" >= 110 words, follows the structure, delivers REAL value (not just a tease), and obeys the pronunciation rules (numbers/currency as words, no ₹ or % symbols).
+- Output JSON ONLY. No preamble, no markdown fences.
 """
 
 
+# Channel-specific creative guardrails injected into every prompt. Keeps the three
+# AI channels on-message and clearly DIFFERENT from each other (anti-duplicate-content).
+CHANNEL_GUARDRAILS = {
+    "ai-tadka": (
+        "ANGLE: AI TOOLS & HOW-TO. Reveal a specific AI tool or a power-prompt and teach the exact steps to use it. "
+        "Name the real tool (ChatGPT, Gemini, Canva AI, NotebookLM, Ideogram, ElevenLabs, etc.) and give the exact prompt/click path. "
+        "Hook around speed or 'hidden tool nobody knows'. Must be genuinely usable today."
+    ),
+    "paisa-pathshala": (
+        "ANGLE: MAKE MONEY WITH AI (honest side-hustle / online income). Show a real, doable way to earn using AI tools "
+        "(content, design, writing, voiceover, faceless videos, freelancing, digital products). "
+        "Give realistic effort and income ranges - NO guaranteed-income claims, NO 'get rich quick', NO investment/stock/crypto advice. "
+        "Frame as 'yeh skill/kaam karke earn kar sakte ho', with the exact first steps."
+    ),
+    "dhandha-dimaag": (
+        "ANGLE: BUSINESS WITH AI. Show how a founder / small business can use AI to automate a task, market, sell or scale. "
+        "Name the AI tool and the workflow. If you cite any real company numbers, only use widely-known facts - do NOT invent statistics. "
+        "Tone: sharp, founder-to-founder, practical."
+    ),
+}
+
+
 def _build_user_prompt(channel_id, channel_cfg, idea):
+    guardrail = CHANNEL_GUARDRAILS.get(channel_id, "")
+    pillars = channel_cfg.get("content_pillars") or []
+    pillars_txt = "\n".join(f"  - {p}" for p in pillars)
     return f"""Channel: {channel_id} ({channel_cfg.get('name')})
 Niche: {channel_cfg.get('niche')}
 Tagline: {channel_cfg.get('tagline')}
 
-TOPIC SEED: {idea}
+{guardrail}
 
-Write a 50-second Hinglish script (exactly 140 words) and exactly 12 captions. The script must be detailed and explain the method fully. Write the full job JSON now."""
+Content pillars for this channel:
+{pillars_txt}
+
+TOPIC SEED (turn this into a viral, genuinely useful Short - reshape it freely to fit the angle and pillars above): {idea}
+
+Write a 40-55 second Hinglish script (110-150 words) following the 6-beat viral structure and the pronunciation rules, plus EXACTLY 12 captions (each line max 3 words). Deliver real, specific value - name the exact AI tool/prompt/steps. Output the full job JSON now."""
 
 
 
@@ -159,7 +214,7 @@ def _try_claude(system, user):
                 "https://api.anthropic.com/v1/messages",
                 data=json.dumps({
                     "model": model,
-                    "max_tokens": 1500,
+                    "max_tokens": 2200,
                     "system": system,
                     "messages": [{"role": "user", "content": user}],
                     "temperature": 0.85,
@@ -205,7 +260,7 @@ def _try_groq(system, user):
                     {"role": "user", "content": user},
                 ],
                 "temperature": 0.85,
-                "max_tokens": 1200,
+                "max_tokens": 2200,
                 "response_format": {"type": "json_object"},
             },
             timeout=90,
@@ -236,7 +291,7 @@ def _try_gemini(system, user):
                 "contents": [{"role": "user", "parts": [{"text": user}]}],
                 "generationConfig": {
                     "temperature": 0.85,
-                    "maxOutputTokens": 1200,
+                    "maxOutputTokens": 2200,
                     "responseMimeType": "application/json",
                 },
             },
@@ -272,7 +327,7 @@ def _try_bluesminds(system, user):
                         {"role": "user", "content": user},
                     ],
                     "temperature": 0.85,
-                    "max_tokens": 1200,
+                    "max_tokens": 2200,
                 },
                 timeout=120,
             )

@@ -1,15 +1,22 @@
 {
   "channel": "paisa-pathshala",
-  "title": "50-30-20 rule: salary ko aise baanto",
-  "description": "Paise ki sabse simple planning. Educational purpose ke liye.",
-  "hashtags": ["#paisa", "#savings", "#budgeting", "#moneytips"],
+  "title": "Earn online with AI faceless videos for beginners",
+  "description": "AI se ghar baithe online income ka simple, honest tareeka. Educational.",
+  "hashtags": ["#shorts", "#makemoneyonline", "#earnwithai", "#sidehustle", "#aitools"],
   "music": "music/bgm.mp3",
-  "voice": "Salary aati hai... aur do hafte mein gayab? Ek simple rule isse fix kar sakta hai - pachaas, tees, bees. Apni income ke pachaas percent zaroori kharchon mein - ghar, khaana, bills. Tees percent apni masti mein - shopping, ghoomna, bahar khaana. Aur bees percent? Sabse pehle sirf savings aur investing ke liye. Bas itna karo, har mahine. Paise ki aisi hi clear baatein chahiye toh Paisa Pathshala ko follow karo.",
+  "voice": "Ghar baithe AI se online kamaana hai? Ek aisa side hustle hai jisme camera ki bhi zaroorat nahi. Isse kehte hain faceless content. Pehle ek topic chuno, jaise facts ya motivation. Phir ChatGPT se chhota script likhwao. Ab ElevenLabs se uss script ki AI voiceover banao, ekdum natural. Free stock clips ke upar voice laga do, captions add karo, aur Short ready. Roz ek video, consistent raho. Shuruaat me kamaai kam hogi, par audience badhte hi yeh asli income ban sakti hai. Yaad rakho, mehnat aur sabr dono chahiye. Aise hi honest AI earning ideas ke liye Paisa Pathshala ko follow karo.",
   "captions": [
-    { "icon": "💸", "kicker": "SACH HAI", "line": "Salary *2 hafte* me gayab?", "broll": "counting cash money rupees" },
-    { "icon": "🧮", "kicker": "RULE", "line": "Yaad rakho: *50-30-20*", "broll": "calculator finance planning desk" },
-    { "icon": "🏠", "kicker": "50%", "line": "Zaroorat\nghar, khaana, bills", "broll": "grocery shopping paying bills" },
-    { "icon": "🛍️", "kicker": "30%", "line": "Masti\nshopping, ghoomna", "broll": "shopping bags mall lifestyle" },
-    { "icon": "🪙", "kicker": "20%", "line": "Sirf **savings** aur invest", "broll": "saving money piggy bank investment" }
+    { "icon": "💰", "kicker": "GHAR SE", "line": "AI se *kamao*", "broll": "person working laptop home desk" },
+    { "icon": "🙈", "kicker": "BONUS", "line": "Camera ki *zaroorat nahi*", "broll": "faceless creator silhouette setup" },
+    { "icon": "🎯", "kicker": "STEP 1", "line": "Topic *chuno*", "broll": "brainstorming ideas notebook" },
+    { "icon": "✍️", "kicker": "STEP 2", "line": "ChatGPT *script*", "broll": "typing script on computer" },
+    { "icon": "🎙️", "kicker": "STEP 3", "line": "ElevenLabs *voice*", "broll": "audio waveform microphone studio" },
+    { "icon": "🎬", "kicker": "STEP 4", "line": "Clips *jodo*", "broll": "video editing timeline screen" },
+    { "icon": "💬", "kicker": "STEP 5", "line": "Captions *add*", "broll": "subtitles on phone video" },
+    { "icon": "📲", "kicker": "READY", "line": "Short *taiyaar*", "broll": "vertical short video phone" },
+    { "icon": "🔁", "kicker": "RULE", "line": "Roz ek *video*", "broll": "calendar daily routine checkmark" },
+    { "icon": "📈", "kicker": "GROWTH", "line": "Audience *badhao*", "broll": "growth chart going up" },
+    { "icon": "⚠️", "kicker": "SACH", "line": "Mehnat *zaroori*", "broll": "focused person working late" },
+    { "icon": "✅", "kicker": "RESULT", "line": "Asli *income*", "broll": "online payment success phone" }
   ]
 }

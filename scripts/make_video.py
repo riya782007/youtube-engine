@@ -74,6 +74,10 @@ try:
     import freesound_sfx as _fs_sfx  # noqa: E402
 except Exception:
     _fs_sfx = None
+try:
+    import music_library as _music_lib  # noqa: E402
+except Exception:
+    _music_lib = None
 
 MAX_CAPTIONS = 12
 TAIL_PAD_S = 0.6      # silence tail so the last word/caption isn't clipped
@@ -372,6 +376,8 @@ def main():
                     help="(default) keep the render work folder; here for clarity")
     ap.add_argument("--no-broll", action="store_true",
                     help="skip Pexels stock footage (gradient background only)")
+    ap.add_argument("--no-music", action="store_true",
+                    help="skip the Jamendo auto-BGM fetch (use channel bgm.mp3 if present)")
     ap.add_argument("--no-loudnorm", action="store_true",
                     help="skip the -14 LUFS audio normalization post-step")
     ap.add_argument("--no-whisper", action="store_true",
@@ -415,18 +421,31 @@ def main():
     total = round(max(MIN_DURATION_S, vo + TAIL_PAD_S), 2)
     print(f"[voice] VO duration {vo:.2f}s -> composition {total:.2f}s")
 
-    # 2) optional music
+    # 2) optional music. Prefer a FRESH, mood-matched Jamendo track (real beats ->
+    #    beat-sync activates; different music every video). Fall back to the
+    #    channel's own music/bgm.mp3, then to no music. All steps fail soft.
     music_track = ""
-    if job.get("music"):
+    music_dst = os.path.join(work, "music.mp3")
+    got_music = False
+    if not args.no_music and _music_lib is not None:
+        tags = cfg.get("jamendo_music_tags") or cfg.get("music_mood") or ""
+        try:
+            if _music_lib.fetch_render_bgm(work, tags):
+                got_music = os.path.exists(music_dst)
+        except Exception as e:
+            print(f"[music] Jamendo error ({e}) - falling back to channel bgm.")
+    if not got_music and job.get("music"):
         src = os.path.join(cdir, job["music"])
         if os.path.exists(src):
-            shutil.copyfile(src, os.path.join(work, "music.mp3"))
-            music_track = (
-                f'<audio id="music" src="music.mp3" data-start="0" data-volume="{MUSIC_VOLUME}"></audio>'
-            )
+            shutil.copyfile(src, music_dst)
+            got_music = True
             print(f"[music] using {job['music']}")
         else:
-            print(f"[music] WARNING: '{src}' not found - rendering without music.")
+            print(f"[music] '{src}' not found and no Jamendo track - rendering without music.")
+    if got_music:
+        music_track = (
+            f'<audio id="music" src="music.mp3" data-start="0" data-volume="{MUSIC_VOLUME}"></audio>'
+        )
 
     # 3) scene timing -> Whisper word-snap, then beat-snap to the BGM if present.
     # Both steps are best-effort: if either fails, we silently fall back to
@@ -443,8 +462,8 @@ def main():
             words = _whisper.align_words_to_script(words, job["voice"])
             custom_starts = _whisper.snap_scene_starts(words, len(captions), total)
             print(f"[whisper] scene starts (word-snapped): {custom_starts}")
-    if not args.no_beats and _beats is not None and job.get("music"):
-        bgm_path = os.path.join(work, "music.mp3")
+    if not args.no_beats and _beats is not None and os.path.exists(music_dst):
+        bgm_path = music_dst
         if os.path.exists(bgm_path):
             beat_times = _beats.detect_beats(bgm_path)
             if beat_times and custom_starts:
