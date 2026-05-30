@@ -37,23 +37,40 @@ def install(time_str="11:00"):
     bat = os.path.join(SCRIPT_DIR, "daily_agent_run.bat")
     if not os.path.exists(bat):
         sys.exit(f"[scheduler] missing wrapper: {bat}")
-    # Wrap in cmd /c "...".  Quote the bat path so spaces in the user's home
-    # directory don't break the command. Keeping /TR short avoids the 261-char
-    # schtasks limit.
-    tr = f'cmd /c ""{bat}""'
-    cmd = [
-        "schtasks", "/Create", "/TN", TASK_NAME, "/TR", tr,
-        "/SC", "DAILY", "/ST", time_str, "/F",
-    ]
+    
+    # Use PowerShell to create the task with advanced settings
+    # 1. Run on battery: $settings.DisallowStartIfOnBatteries = $false
+    # 2. Wake computer: $settings.WakeToRun = $true
+    # 3. Start when available (if missed): $settings.StartWhenAvailable = $true
+    
+    ps_cmd = f"""
+    $action = New-ScheduledTaskAction -Execute 'cmd.exe' -Argument '/c \"{bat}\"'
+    $trigger = New-ScheduledTaskTrigger -Daily -At {time_str}
+    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -WakeToRun -StartWhenAvailable
+    Register-ScheduledTask -TaskName '{TASK_NAME}' -Action $action -Trigger $trigger -Settings $settings -Force
+    """
+    
     print(f"[scheduler] installing task '{TASK_NAME}' at {time_str} daily...")
-    print(f"[scheduler] command: {tr}")
-    res = subprocess.run(cmd, capture_output=True, text=True)
+    res = subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd], capture_output=True, text=True)
+    
     if res.returncode != 0:
-        print(f"[scheduler] FAILED:\n{res.stderr}")
-        sys.exit(1)
-    print(res.stdout.strip() or "[scheduler] OK")
+        print(f"[scheduler] FAILED via PowerShell, falling back to basic schtasks...")
+        print(f"[scheduler] PS Error: {res.stderr}")
+        # Fallback to basic schtasks if PowerShell fails
+        cmd = [
+            "schtasks", "/Create", "/TN", TASK_NAME, "/TR", f'cmd /c "{bat}"',
+            "/SC", "DAILY", "/ST", time_str, "/F",
+        ]
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        if res.returncode != 0:
+            print(f"[scheduler] FINAL FAILURE:\n{res.stderr}")
+            sys.exit(1)
+        print(res.stdout.strip() or "[scheduler] OK (Basic)")
+    else:
+        print(f"[scheduler] OK (Advanced settings enabled: Battery, Wake, Catch-up)")
+    
     print(f"[scheduler] logs will be written to: {LOG_DIR}\\daily_agent_<YYYY-MM-DD>.log")
-    print(f"[scheduler] manage / view: schtasks /Query /TN {TASK_NAME} /V /FO LIST")
+
 
 
 def uninstall():

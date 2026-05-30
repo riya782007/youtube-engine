@@ -75,7 +75,7 @@ try:
 except Exception:
     _fs_sfx = None
 
-MAX_CAPTIONS = 5
+MAX_CAPTIONS = 12
 TAIL_PAD_S = 0.6      # silence tail so the last word/caption isn't clipped
 MIN_DURATION_S = 6.0  # never make a Short shorter than this
 MUSIC_VOLUME = 0.12   # background music sits well under the voice
@@ -83,7 +83,7 @@ CAPTION_GAP_S = 0.0   # v2 scenes are GSAP-driven (not clips), so they stay cont
 SFX_WHOOSH_VOLUME = 0.45  # transition whoosh between scenes
 SFX_DING_VOLUME = 0.6     # payoff ding on the final scene
 # default per-scene icons if a caption doesn't specify one (kept generic/safe)
-DEFAULT_ICONS = ["", "", "", "", ""]
+DEFAULT_ICONS = ["", "", "", "", "", "", "", "", "", "", "", ""]
 
 
 # ----------------------------------------------------------- small helpers
@@ -317,25 +317,21 @@ def build_broll_tracks(files, timings, total):
     return "\n        ".join(tags)
 
 
-def copy_fonts(work):
-    """Copy bundled .ttf fonts into the render folder so hyperframes embeds them
-    instead of fetching from Google Fonts (which throws lint warnings + adds
-    latency, and worse - if Chrome's network is sandboxed, falls back to a
-    generic font and ruins the typography). Fails soft if the assets folder
-    doesn't exist."""
+def copy_assets(work):
+    """Copy bundled .ttf fonts and GSAP into the render folder."""
+    # 1) Fonts
     src_dir = os.path.join(PROJECT_ROOT, "assets", "fonts")
-    if not os.path.isdir(src_dir):
-        return False
-    fonts_dir = os.path.join(work, "fonts")
-    os.makedirs(fonts_dir, exist_ok=True)
-    n = 0
-    for fn in os.listdir(src_dir):
-        if fn.lower().endswith((".ttf", ".woff2", ".woff", ".otf")):
-            shutil.copyfile(os.path.join(src_dir, fn), os.path.join(fonts_dir, fn))
-            n += 1
-    if n:
-        print(f"[fonts] bundled {n} font file(s) locally (no Google Fonts fetch)")
-    return n > 0
+    if os.path.isdir(src_dir):
+        fonts_dir = os.path.join(work, "fonts")
+        os.makedirs(fonts_dir, exist_ok=True)
+        for fn in os.listdir(src_dir):
+            if fn.lower().endswith((".ttf", ".woff2", ".woff", ".otf")):
+                shutil.copyfile(os.path.join(src_dir, fn), os.path.join(fonts_dir, fn))
+    
+    # 2) GSAP
+    gsap_src = os.path.join(PROJECT_ROOT, "assets", "gsap.min.js")
+    if os.path.exists(gsap_src):
+        shutil.copyfile(gsap_src, os.path.join(work, "gsap.min.js"))
 
 
 def normalize_audio(work):
@@ -512,9 +508,8 @@ def main():
         f.write(index_html)
     print("[build] index.html written")
 
-    # 3b) bundle fonts locally so hyperframes embeds them (no online fetch,
-    #     no fallback typography, no lint warnings).
-    copy_fonts(work)
+    # 3b) bundle assets locally (fonts, gsap)
+    copy_assets(work)
 
     # 4) upload metadata sidecar (consumed by upload.py)
     upload_meta = {

@@ -1,46 +1,17 @@
 <!doctype html>
-<!--
-  v3 MOTION-GRAPHICS TEMPLATE (1080x1920 vertical short) - shared by all channels.
-
-  make_video.py fills the {{TOKENS}} below and injects this channel's theme colours,
-  then hyperframes renders it. Everything animates on ONE paused GSAP timeline
-  registered as window.__timelines["main"], so the render is frame-deterministic.
-
-  WHAT'S NEW IN v3 (the "not boring + real footage" upgrade)
-    - REAL STOCK B-ROLL behind every scene (Pexels), dimmed by a readability scrim,
-      with a slow Ken Burns push and a crossfade between clips.
-    - Snappier, faster transitions: each scene punches in (zoom) and the words
-      reveal on a tighter stagger; quick blur-out on exit.
-    - A subtle cut "flash" punctuates every scene change (synced with the whoosh SFX).
-    - Living overlay texture (grid + particles + glow) rides ABOVE the footage so the
-      frame is never static even when the clip is calm.
-    - Animated bottom progress bar + an end Call-To-Action card.
-
-  LAYER ORDER (z-index):  bg(0) < b-roll(1) < scrim(2) < texture(3) < scenes(5) < chrome(6)
-
-  TOKENS
-    theme:  {{BG_FROM}} {{BG_TO}} {{ACCENT}} {{ACCENT2}} {{KICKER_COLOR}} {{TEXT_COLOR}} {{MOTIF}} {{WATERMARK}} {{HANDLE}}
-    meta:   {{TITLE}} {{DURATION}}
-    scenes: {{CAPn_AT}} {{CAPn_LEN}} {{CAPn_ICON}} {{CAPn_KICKER}} {{CAPn_LINE}}   (n = 1..5)
-    media:  {{BROLL_TRACKS}} {{MUSIC_TRACK}} {{SFX_TRACKS}}
-
-  Caption markup (from the job file): *word* = accent colour, **word** = secondary accent.
--->
 <html lang="hi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
     <title>{{TITLE}}</title>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="gsap.min.js"></script>
     <style>
-      /* self-hosted fonts (copied into ./fonts/ by make_video.py) so hyperframes
-         embeds them rather than fetching from Google Fonts. Eliminates the
-         "Baloo 2 fallback" lint warning + ensures typography is always correct. */
       @font-face { font-family: "Baloo 2"; src: url("fonts/Baloo2-Bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
       @font-face { font-family: "Baloo 2"; src: url("fonts/Baloo2-ExtraBold.ttf") format("truetype"); font-weight: 800; font-display: block; }
       @font-face { font-family: "Inter"; src: url("fonts/Inter-Bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
       @font-face { font-family: "Inter"; src: url("fonts/Inter-ExtraBold.ttf") format("truetype"); font-weight: 800; font-display: block; }
       @font-face { font-family: "Inter"; src: url("fonts/Inter-Black.ttf") format("truetype"); font-weight: 900; font-display: block; }
+      
       :root {
         --bg-from: {{BG_FROM}};
         --bg-to: {{BG_TO}};
@@ -49,223 +20,169 @@
         --kicker: {{KICKER_COLOR}};
         --text: {{TEXT_COLOR}};
       }
+      
       * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body {
         width: 1080px; height: 1920px; overflow: hidden;
         background-color: var(--bg-to);
-        font-family: "Baloo 2", system-ui, sans-serif;
+        font-family: "Inter", "Baloo 2", system-ui, sans-serif;
       }
+      
       #root { position: relative; width: 1080px; height: 1920px; }
-      #stage { position: absolute; inset: 0; transform-origin: 50% 50%; will-change: transform; }
+      #stage { position: absolute; inset: 0; }
 
-      /* ---------- layer 0: gradient fallback (shows when a scene has no B-roll) ---------- */
-      .bg {
-        position: absolute; inset: 0; z-index: 0;
-        background: radial-gradient(125% 95% at 50% 26%, var(--bg-from) 0%, var(--bg-to) 72%);
-      }
+      /* Layer 1: Background & B-roll */
+      .bg { position: absolute; inset: 0; z-index: 0; background: radial-gradient(circle, var(--bg-from), var(--bg-to)); }
+      .broll { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+      .scrim { position: absolute; inset: 0; z-index: 2; background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent 20%, transparent 80%, rgba(0,0,0,0.6)); }
 
-      /* ---------- layer 1: stock B-roll ---------- */
-      .broll {
-        position: absolute; inset: 0; z-index: 1;
-        width: 1080px; height: 1920px; object-fit: cover;
-        opacity: 0; will-change: transform, opacity; transform-origin: 50% 50%;
-      }
-
-      /* ---------- layer 2: readability scrim over the footage ---------- */
-      .scrim {
-        position: absolute; inset: 0; z-index: 2;
-        background:
-          radial-gradient(78% 56% at 50% 50%, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.12) 46%, rgba(0,0,0,0.55) 100%),
-          linear-gradient(180deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.18) 38%, rgba(0,0,0,0.22) 62%, rgba(0,0,0,0.70) 100%),
-          linear-gradient(0deg, color-mix(in srgb, var(--bg-to) 50%, transparent), color-mix(in srgb, var(--bg-from) 22%, transparent));
+      /* Layer 3: Subtitles / Captions */
+      .captions-container {
+        position: absolute;
+        bottom: 700px;
+        left: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        text-align: center;
+        padding: 0 80px;
       }
 
-      /* ---------- layer 3: living overlay texture ---------- */
-      .grid {
-        position: absolute; inset: -10%; z-index: 3; opacity: 0.06;
-        background-image:
-          linear-gradient(var(--accent) 1px, transparent 1px),
-          linear-gradient(90deg, var(--accent) 1px, transparent 1px);
-        background-size: 96px 96px; will-change: transform;
-      }
-      .glow {
-        position: absolute; z-index: 3; top: 14%; left: 50%; margin-left: -380px;
-        width: 760px; height: 760px; border-radius: 50%;
-        background: radial-gradient(circle, color-mix(in srgb, var(--accent) 30%, transparent), transparent 65%);
-        filter: blur(12px); will-change: transform, opacity;
-      }
-      #particles { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
-      .p { position: absolute; border-radius: 50%; background: var(--accent); opacity: 0.22; will-change: transform, opacity; }
-      .vignette {
-        position: absolute; inset: 0; z-index: 3;
-        background: radial-gradient(72% 60% at 50% 46%, rgba(0,0,0,0) 56%, rgba(0,0,0,0.5) 100%);
-      }
-      .flash {
-        position: absolute; inset: 0; z-index: 4; opacity: 0; pointer-events: none;
-        background: radial-gradient(60% 45% at 50% 48%, color-mix(in srgb, var(--accent) 65%, #ffffff) 0%, transparent 70%);
-        mix-blend-mode: screen; will-change: opacity;
-      }
-      /* ---------- reaction emoji burst (visual SFX on accent words) ---------- */
-      #reactions {
-        position: absolute; inset: 0; z-index: 5; pointer-events: none;
-      }
-      .react {
-        position: absolute; left: 50%; top: 50%; font-size: 220px; line-height: 1;
-        transform: translate(-50%,-50%) scale(0); opacity: 0;
-        filter: drop-shadow(0 14px 38px rgba(0,0,0,0.6));
-        will-change: transform, opacity;
+      .caption-group {
+        position: absolute;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        opacity: 0;
+        visibility: hidden;
       }
 
-      /* ---------- karaoke word strip (Whisper-timed live subtitles, Gen-Z style) ----------
-         Single-line ticker that pops one word at a time exactly when it's spoken.
-         Active word: huge + accent color + chip background. Past/future words: dim.
-         The strip "carries" 3 words at a time so the eye stays in one place. */
-      .karaoke {
-        position: absolute; left: 0; right: 0; bottom: 1180px; z-index: 5;
-        text-align: center; padding: 0 50px; pointer-events: none;
-        height: 180px;
-        display: flex; align-items: center; justify-content: center;
-      }
-      .kgroup {
-        position: absolute; left: 0; right: 0;
-        display: flex; justify-content: center; align-items: center;
-        gap: 18px; flex-wrap: wrap;
-        padding: 0 60px;
-      }
-      .karaoke .kw {
-        display: inline-block;
-        color: rgba(255,255,255,0.42);
-        font-family: "Inter", "Baloo 2", sans-serif; font-weight: 900;
-        font-size: 70px; letter-spacing: 0.5px; line-height: 1;
-        text-shadow: 0 4px 14px rgba(0,0,0,0.88), 0 0 1px rgba(0,0,0,1);
-        transition: color 0.05s linear, transform 0.05s linear, background 0.05s linear, padding 0.05s linear;
-        will-change: color, transform, background;
-        padding: 6px 4px;
-        border-radius: 16px;
-      }
-      .karaoke .kw.hot {
-        color: #fff;
-        transform: scale(1.18);
+      .kicker-box {
         background: var(--accent);
-        padding: 8px 22px;
-        text-shadow: 0 4px 14px rgba(0,0,0,0.95), 0 0 1px #000;
-        box-shadow: 0 10px 30px color-mix(in srgb, var(--accent) 70%, transparent),
-                    0 0 0 4px color-mix(in srgb, var(--accent) 35%, transparent);
-      }
-      .karaoke .kw.past {
-        color: rgba(255,255,255,0.85);
+        color: #000;
+        padding: 8px 24px;
+        border-radius: 12px;
+        font-weight: 900;
+        font-size: 42px;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
       }
 
-      /* ---------- layer 5: scenes (text) ---------- */
-      .scene {
-        position: absolute; left: 80px; right: 80px; top: 50%; z-index: 5;
-        transform: translateY(-50%); text-align: center; will-change: transform, opacity, filter;
+      .line-text {
+        font-size: 110px;
+        font-weight: 900;
+        color: #fff;
+        line-height: 1.1;
+        text-transform: uppercase;
+        text-shadow: 0 10px 30px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8);
       }
-      .icon {
-        font-size: 150px; line-height: 1; margin-bottom: 26px; will-change: transform, opacity;
-        filter: drop-shadow(0 14px 30px rgba(0,0,0,0.55));
-      }
-      .kicker {
-        display: inline-block; color: var(--kicker); font-family: "Inter", sans-serif; font-weight: 800;
-        font-size: 42px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 26px;
-        padding: 10px 22px; border-radius: 999px;
-        background: color-mix(in srgb, var(--bg-to) 55%, transparent);
-        box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent);
-      }
-      .line {
-        color: var(--text); font-weight: 800; font-size: 104px; line-height: 1.12;
-        text-shadow: 0 6px 14px rgba(0,0,0,0.85), 0 14px 48px rgba(0,0,0,0.6);
-      }
-      .word { display: inline-block; will-change: transform, opacity, filter; }
-      .accent  { color: var(--accent); }
+
+      .word { display: inline-block; white-space: pre; }
+      .accent { color: var(--accent); }
       .accent2 { color: var(--accent2); }
 
-      /* ---------- layer 6: chrome ---------- */
-      .cta {
-        position: absolute; left: 0; right: 0; bottom: 250px; z-index: 6; text-align: center;
-        opacity: 0; will-change: transform, opacity;
-      }
-      .cta .pill {
-        display: inline-block; padding: 26px 54px; border-radius: 999px;
-        background: var(--accent); color: #0b0b16;
-        font-family: "Inter", sans-serif; font-weight: 900; font-size: 52px; letter-spacing: 1px;
-        box-shadow: 0 16px 50px color-mix(in srgb, var(--accent) 50%, transparent);
-      }
-      .cta .handle { margin-top: 26px; color: #fff; font-weight: 800; font-size: 40px; letter-spacing: 2px;
-        text-shadow: 0 4px 16px rgba(0,0,0,0.7); }
+      /* Layer 4: Branding & Watermark */
       .watermark {
-        position: absolute; bottom: 150px; left: 0; right: 0; z-index: 6; text-align: center;
-        color: #fff; font-family: "Inter", sans-serif; font-weight: 900;
-        font-size: 38px; letter-spacing: 8px; opacity: 0.8; text-shadow: 0 4px 14px rgba(0,0,0,0.7);
+        position: absolute;
+        top: 80px;
+        left: 80px;
+        font-size: 40px;
+        font-weight: 900;
+        color: #fff;
+        opacity: 0.6;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        z-index: 20;
       }
-      .progress {
-        position: absolute; top: auto; bottom: 0; left: 0; z-index: 6; height: 12px; width: 1080px;
-        transform-origin: left center;
-        background: linear-gradient(90deg, var(--accent), var(--accent2));
-        box-shadow: 0 -2px 14px color-mix(in srgb, var(--accent) 55%, transparent);
+
+      .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 15px;
+        background: var(--accent);
+        width: 0%;
+        z-index: 20;
+      }
+
+      .flash {
+        position: absolute;
+        inset: 0;
+        background: #fff;
+        opacity: 0;
+        z-index: 30;
+        pointer-events: none;
       }
     </style>
   </head>
   <body>
-    <div
-      id="root"
-      data-composition-id="main"
-      data-start="0"
-      data-duration="{{DURATION}}"
-      data-width="1080"
-      data-height="1920"
-    >
+    <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-duration="{{DURATION}}" data-start="0">
       <div id="stage">
         <div class="bg"></div>
-
-        <!-- stock B-roll videos (one per scene; injected by make_video.py) -->
         {{BROLL_TRACKS}}
-
         <div class="scrim"></div>
-        <div class="grid"></div>
-        <div class="glow"></div>
-        <div id="particles"></div>
-        <div class="vignette"></div>
-        <div class="flash" id="flash"></div>
-        <!-- visual reactions: an emoji burst pops on each scene's icon when it lands -->
-        <div id="reactions"></div>
-
-        <div class="scene" data-at="{{CAP1_AT}}" data-len="{{CAP1_LEN}}">
-          <div class="icon">{{CAP1_ICON}}</div>
-          <div class="kicker">{{CAP1_KICKER}}</div>
-          <div class="line">{{CAP1_LINE}}</div>
-        </div>
-        <div class="scene" data-at="{{CAP2_AT}}" data-len="{{CAP2_LEN}}">
-          <div class="icon">{{CAP2_ICON}}</div>
-          <div class="kicker">{{CAP2_KICKER}}</div>
-          <div class="line">{{CAP2_LINE}}</div>
-        </div>
-        <div class="scene" data-at="{{CAP3_AT}}" data-len="{{CAP3_LEN}}">
-          <div class="icon">{{CAP3_ICON}}</div>
-          <div class="kicker">{{CAP3_KICKER}}</div>
-          <div class="line">{{CAP3_LINE}}</div>
-        </div>
-        <div class="scene" data-at="{{CAP4_AT}}" data-len="{{CAP4_LEN}}">
-          <div class="icon">{{CAP4_ICON}}</div>
-          <div class="kicker">{{CAP4_KICKER}}</div>
-          <div class="line">{{CAP4_LINE}}</div>
-        </div>
-        <div class="scene" data-at="{{CAP5_AT}}" data-len="{{CAP5_LEN}}">
-          <div class="icon">{{CAP5_ICON}}</div>
-          <div class="kicker">{{CAP5_KICKER}}</div>
-          <div class="line">{{CAP5_LINE}}</div>
-        </div>
-
-        <div class="cta" id="cta">
-          <div class="pill">Follow {{WATERMARK}}</div>
-          <div class="handle">{{HANDLE}}</div>
+        
+        <div class="captions-container">
+          <div id="cg-1" class="caption-group" data-at="{{CAP1_AT}}" data-len="{{CAP1_LEN}}">
+            <div class="kicker-box">{{CAP1_KICKER}}</div>
+            <div class="line-text">{{CAP1_LINE}}</div>
+          </div>
+          <div id="cg-2" class="caption-group" data-at="{{CAP2_AT}}" data-len="{{CAP2_LEN}}">
+            <div class="kicker-box">{{CAP2_KICKER}}</div>
+            <div class="line-text">{{CAP2_LINE}}</div>
+          </div>
+          <div id="cg-3" class="caption-group" data-at="{{CAP3_AT}}" data-len="{{CAP3_LEN}}">
+            <div class="kicker-box">{{CAP3_KICKER}}</div>
+            <div class="line-text">{{CAP3_LINE}}</div>
+          </div>
+          <div id="cg-4" class="caption-group" data-at="{{CAP4_AT}}" data-len="{{CAP4_LEN}}">
+            <div class="kicker-box">{{CAP4_KICKER}}</div>
+            <div class="line-text">{{CAP4_LINE}}</div>
+          </div>
+          <div id="cg-5" class="caption-group" data-at="{{CAP5_AT}}" data-len="{{CAP5_LEN}}">
+            <div class="kicker-box">{{CAP5_KICKER}}</div>
+            <div class="line-text">{{CAP5_LINE}}</div>
+          </div>
+          <div id="cg-6" class="caption-group" data-at="{{CAP6_AT}}" data-len="{{CAP6_LEN}}">
+            <div class="kicker-box">{{CAP6_KICKER}}</div>
+            <div class="line-text">{{CAP6_LINE}}</div>
+          </div>
+          <div id="cg-7" class="caption-group" data-at="{{CAP7_AT}}" data-len="{{CAP7_LEN}}">
+            <div class="kicker-box">{{CAP7_KICKER}}</div>
+            <div class="line-text">{{CAP7_LINE}}</div>
+          </div>
+          <div id="cg-8" class="caption-group" data-at="{{CAP8_AT}}" data-len="{{CAP8_LEN}}">
+            <div class="kicker-box">{{CAP8_KICKER}}</div>
+            <div class="line-text">{{CAP8_LINE}}</div>
+          </div>
+          <div id="cg-9" class="caption-group" data-at="{{CAP9_AT}}" data-len="{{CAP9_LEN}}">
+            <div class="kicker-box">{{CAP9_KICKER}}</div>
+            <div class="line-text">{{CAP9_LINE}}</div>
+          </div>
+          <div id="cg-10" class="caption-group" data-at="{{CAP10_AT}}" data-len="{{CAP10_LEN}}">
+            <div class="kicker-box">{{CAP10_KICKER}}</div>
+            <div class="line-text">{{CAP10_LINE}}</div>
+          </div>
+          <div id="cg-11" class="caption-group" data-at="{{CAP11_AT}}" data-len="{{CAP11_LEN}}">
+            <div class="kicker-box">{{CAP11_KICKER}}</div>
+            <div class="line-text">{{CAP11_LINE}}</div>
+          </div>
+          <div id="cg-12" class="caption-group" data-at="{{CAP12_AT}}" data-len="{{CAP12_LEN}}">
+            <div class="kicker-box">{{CAP12_KICKER}}</div>
+            <div class="line-text">{{CAP12_LINE}}</div>
+          </div>
         </div>
 
         <div class="watermark">{{WATERMARK}}</div>
-        <div class="progress"></div>
+        <div class="progress-bar"></div>
+        <div class="flash"></div>
       </div>
 
-      <!-- audio: voiceover (always), music (optional), SFX (optional) -->
       <audio id="voiceover" src="voice.wav" data-start="0" data-volume="1.0"></audio>
       {{MUSIC_TRACK}}
       {{SFX_TRACKS}}
@@ -274,164 +191,105 @@
     <script>
       window.__timelines = window.__timelines || {};
       const root = document.getElementById("root");
-      const total = parseFloat(root.dataset.duration) || 16;
-      const reps = (period) => Math.max(1, Math.ceil(total / period));
-
-      /* build floating particles */
-      const pc = document.getElementById("particles");
-      const PN = 16;
-      const parts = [];
-      for (let i = 0; i < PN; i++) {
-        const d = document.createElement("div");
-        d.className = "p";
-        const s = 6 + (i % 5) * 5;
-        d.style.width = s + "px"; d.style.height = s + "px";
-        d.style.left = ((i * 67) % 100) + "%";
-        d.style.top = (12 + ((i * 37) % 80)) + "%";
-        pc.appendChild(d); parts.push(d);
-      }
-
-      /* split a .line into word spans, preserving accent classes and <br> */
-      function splitWords(lineEl) {
-        const out = [];
-        lineEl.childNodes.forEach((node) => {
-          if (node.nodeName === "BR") { out.push(document.createElement("br")); return; }
-          const cls = node.nodeType === 1 ? node.className : "";
-          const txt = node.textContent || "";
-          txt.split(/(\s+)/).forEach((tok) => {
-            if (tok === "") return;
-            if (/^\s+$/.test(tok)) { out.push(document.createTextNode(" ")); return; }
-            const s = document.createElement("span");
-            s.className = ("word " + cls).trim();
-            s.textContent = tok;
-            out.push(s);
-          });
-        });
-        lineEl.innerHTML = "";
-        out.forEach((n) => lineEl.appendChild(n));
-        return lineEl.querySelectorAll(".word");
-      }
-
+      const duration = parseFloat(root.dataset.duration);
       const tl = gsap.timeline({ paused: true });
 
-      /* karaoke layer removed - scene captions are the single source of subtitle.
-         Removing the global word-by-word transcript fixes the "backwards to steps"
-         bug where the live karaoke text would not match the summary scene-caption
-         phrase shown at the same moment. The scene captions themselves now do the
-         heavy lifting with their built-in per-word stagger reveal below. */
-      void({{WORD_DATA}});  /* keep token referenced so make_video.py keeps emitting it */
+      // Subtle background zoom
+      tl.to("#stage", { scale: 1.05, duration: duration, ease: "none" }, 0);
 
-      /* ---- subtle camera breathing on the whole stage ---- */
-      gsap.set("#stage", { scale: 1.0 });
-      tl.to("#stage", { scale: 1.04, duration: total, ease: "sine.inOut" }, 0);
-
-      /* ---- B-roll: crossfade + Ken Burns push ---- */
-      const brolls = gsap.utils.toArray(".broll");
-      brolls.forEach((v) => {
-        const at = parseFloat(v.dataset.at) || 0;
-        const len = parseFloat(v.dataset.len) || 3;
-        const isLast = at + len >= total - 0.05;
-        gsap.set(v, { opacity: 0, scale: 1.1, xPercent: 0 });
-        tl.to(v, { opacity: 1, duration: 0.3, ease: "power1.out" }, Math.max(0, at - 0.02));
-        tl.to(v, { scale: 1.22, xPercent: (parts.length % 2 ? 1.5 : -1.5), duration: len + 0.6, ease: "none" }, at);
-        if (!isLast) {
-          tl.to(v, { opacity: 0, duration: 0.35, ease: "power1.in" }, at + len - 0.05);
+      // B-roll transitions
+      const brolls = document.querySelectorAll(".broll");
+      brolls.forEach((v, i) => {
+        const start = parseFloat(v.dataset.at);
+        const len = parseFloat(v.dataset.len);
+        tl.to(v, { opacity: 1, duration: 0.4 }, start);
+        tl.fromTo(v, { scale: 1.2 }, { scale: 1, duration: len, ease: "none" }, start);
+        if (i < brolls.length - 1) {
+          tl.to(v, { opacity: 0, duration: 0.4 }, start + len - 0.2);
         }
       });
 
-      /* ---- living overlay texture ---- */
-      tl.to(".grid", { yPercent: 6, xPercent: 3, duration: total, ease: "none" }, 0);
-      tl.fromTo(".glow", { scale: 0.9, opacity: 0.4 },
-        { scale: 1.12, opacity: 0.7, duration: 2.6, ease: "sine.inOut", repeat: reps(2.6), yoyo: true }, 0);
-      parts.forEach((p, i) => {
-        tl.to(p, { y: -180 - (i % 4) * 60, x: (i % 2 ? 40 : -40), duration: total, ease: "none" }, 0);
-        tl.fromTo(p, { opacity: 0.1 },
-          { opacity: 0.4, duration: 1.6 + (i % 3) * 0.4, ease: "sine.inOut", repeat: reps(2), yoyo: true }, 0);
-      });
+      // Captions & Subtitles
+      const groups = document.querySelectorAll(".caption-group");
+      groups.forEach((group, i) => {
+        const start = parseFloat(group.dataset.at);
+        const len = parseFloat(group.dataset.len);
+        if (len <= 0) return;
 
-      /* ---- scenes ---- */
-      const scenes = gsap.utils.toArray(".scene").filter((s) => parseFloat(s.dataset.len) > 0);
-      scenes.forEach((sc, idx) => {
-        const at = parseFloat(sc.dataset.at) || 0;
-        const len = parseFloat(sc.dataset.len) || 3;
-        const next = scenes[idx + 1];
-        const nextAt = next ? parseFloat(next.dataset.at) : total;
-        const icon = sc.querySelector(".icon");
-        const kicker = sc.querySelector(".kicker");
-        const words = splitWords(sc.querySelector(".line"));
-        const accents = sc.querySelectorAll(".word.accent, .word.accent2");
-
-        /* whole-scene transition - 4 variants cycle so it never feels repetitive:
-              0: whip pan (slide + tilt + blur)
-              1: zoom punch (scale-down lock-in)
-              2: shake / glitch jump
-              3: rotate-in (3D card flip)
-           Each variant is roughly the same DURATION for predictable pacing. */
-        const variant = idx % 4;
-        const dir = idx % 2 === 0 ? 1 : -1;
-        if (variant === 0) {
-          gsap.set(sc, { opacity: 0, scale: 1.12, x: 280 * dir, y: "-50%", rotation: dir * 4, filter: "blur(12px)" });
-          tl.to(sc, { opacity: 1, scale: 1, x: 0, rotation: 0, filter: "blur(0px)", duration: 0.42, ease: "expo.out" }, at);
-        } else if (variant === 1) {
-          gsap.set(sc, { opacity: 0, scale: 1.55, y: "-50%", filter: "blur(14px) brightness(1.4)" });
-          tl.to(sc, { opacity: 1, scale: 1, filter: "blur(0px) brightness(1)", duration: 0.40, ease: "back.out(2.2)" }, at);
-        } else if (variant === 2) {
-          gsap.set(sc, { opacity: 0, scale: 0.78, y: "-50%", x: 0, filter: "blur(8px)" });
-          tl.to(sc, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.30, ease: "power3.out" }, at);
-          /* glitch shake */
-          tl.fromTo(sc, { x: 0 }, { x: 14 * dir, duration: 0.04, yoyo: true, repeat: 5, ease: "none" }, at + 0.02);
-        } else {
-          gsap.set(sc, { opacity: 0, scale: 0.9, y: "-50%", rotationY: 90 * dir, filter: "blur(8px)", transformPerspective: 800 });
-          tl.to(sc, { opacity: 1, scale: 1, rotationY: 0, filter: "blur(0px)", duration: 0.50, ease: "power3.out" }, at);
-        }
-
-        /* cut flash on the beat (also where the whoosh SFX lands) */
-        tl.fromTo("#flash", { opacity: 0 },
-          { opacity: 0.7, duration: 0.08, ease: "power2.out" }, at)
-          .to("#flash", { opacity: 0, duration: 0.32, ease: "power2.in" }, at + 0.08);
-
-        /* reaction burst: spawn a giant version of the scene's icon that pops + fades */
-        if (icon && icon.textContent.trim()) {
-          const burst = document.createElement("div");
-          burst.className = "react";
-          burst.textContent = icon.textContent.trim();
-          burst.style.left = (35 + (idx * 13) % 30) + "%";
-          burst.style.top = (25 + (idx * 17) % 35) + "%";
-          document.getElementById("reactions").appendChild(burst);
-          tl.fromTo(burst,
-            { opacity: 0, scale: 0, rotation: -28 },
-            { opacity: 0.85, scale: 1, rotation: dir * 8, duration: 0.32, ease: "back.out(3)" }, at + 0.05);
-          tl.to(burst, { opacity: 0, scale: 1.4, rotation: dir * 24, duration: 0.45, ease: "power2.in" }, at + 0.55);
-        }
-
-        if (icon && icon.textContent.trim()) {
-          tl.fromTo(icon, { scale: 0, rotation: -22, opacity: 0 },
-            { scale: 1, rotation: 0, opacity: 1, duration: 0.42, ease: "back.out(3)" }, at + 0.04);
-          tl.to(icon, { y: -14, duration: 1.2, ease: "sine.inOut", repeat: reps(1.2), yoyo: true }, at + 0.46);
-        }
+        // Entrance
+        tl.set(group, { visibility: "visible" }, start);
+        tl.to(group, { opacity: 1, duration: 0.1 }, start);
+        
+        const kicker = group.querySelector(".kicker-box");
         if (kicker && kicker.textContent.trim()) {
-          tl.fromTo(kicker, { opacity: 0, y: 20, scale: 0.85 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.34, ease: "back.out(2)" }, at + 0.1);
+            tl.from(kicker, { y: 20, opacity: 0, scale: 0.8, duration: 0.4, ease: "back.out(2)" }, start);
         }
-        tl.fromTo(words, { opacity: 0, y: 60, scale: 0.6, filter: "blur(12px)", rotationX: -45 },
-          { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", rotationX: 0, duration: 0.38, stagger: 0.035, ease: "back.out(2)" },
-          at + 0.14);
-        if (accents.length) {
-          tl.fromTo(accents, { scale: 1 }, { scale: 1.28, duration: 0.18, ease: "back.out(3)", repeat: 1, yoyo: true }, at + 0.55);
-        }
-        /* hard exit: blur + scale + slide off before the next scene */
-        const exitAt = Math.min(at + len, nextAt) - 0.22;
-        tl.to(sc, { opacity: 0, y: "-62%", scale: 1.12, x: -180 * dir, filter: "blur(8px)", duration: 0.24, ease: "power2.in" },
-          Math.max(at + 0.5, exitAt));
+
+        const line = group.querySelector(".line-text");
+        // Split line into words for punchy reveal
+        const words = line.innerHTML.split(/(\s+|<br\/?>)/);
+        line.innerHTML = "";
+        words.forEach(w => {
+            if (w.match(/<br\/?>/)) {
+                line.appendChild(document.createElement("br"));
+            } else if (w.trim()) {
+                const span = document.createElement("span");
+                span.className = "word";
+                span.innerHTML = w;
+                line.appendChild(span);
+            } else {
+                line.appendChild(document.createTextNode(w));
+            }
+        });
+
+        const wordSpans = line.querySelectorAll(".word");
+        tl.from(wordSpans, { 
+            scale: 0, 
+            opacity: 0, 
+            y: 40, 
+            duration: 0.3, 
+            stagger: 0.05, 
+            ease: "back.out(3)" 
+        }, start + 0.1);
+
+        // Flash on scene change
+        tl.to(".flash", { opacity: 0.2, duration: 0.05, yoyo: true, repeat: 1 }, start);
+
+        // Exit
+        const exitAt = start + len;
+        tl.to(group, { opacity: 0, scale: 0.9, duration: 0.2 }, exitAt - 0.2);
+        tl.set(group, { visibility: "hidden" }, exitAt);
       });
 
-      /* ---- end CTA ---- */
-      tl.fromTo("#cta", { opacity: 0, scale: 0.8, y: 30 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "back.out(1.7)" }, Math.max(0, total - 2.3));
-      tl.to("#cta .pill", { scale: 1.06, duration: 0.45, ease: "sine.inOut", repeat: 3, yoyo: true }, total - 1.7);
+      // Progress bar
+      tl.to(".progress-bar", { width: "100%", duration: duration, ease: "none" }, 0);
 
-      /* ---- progress bar ---- */
-      tl.fromTo(".progress", { scaleX: 0 }, { scaleX: 1, duration: total, ease: "none" }, 0);
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
+0, 
+                opacity: 0, 
+                y: 40, 
+                duration: 0.25, 
+                ease: "back.out(3)" 
+            }, revealAt);
+            
+            // Add a little "pulse" when it hits
+            tl.to(span, { scale: 1.2, duration: 0.1, yoyo: true, repeat: 1 }, revealAt);
+        });
+
+        // Flash on scene change
+        tl.to(".flash", { opacity: 0.2, duration: 0.05, yoyo: true, repeat: 1 }, start);
+
+        // Exit
+        const exitAt = start + len;
+        tl.to(group, { opacity: 0, scale: 0.9, duration: 0.2 }, exitAt - 0.2);
+        tl.set(group, { visibility: "hidden" }, exitAt);
+      });
+
+      // Progress bar
+      tl.to(".progress-bar", { width: "100%", duration: duration, ease: "none" }, 0);
 
       window.__timelines["main"] = tl;
     </script>

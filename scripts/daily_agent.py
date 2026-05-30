@@ -128,56 +128,62 @@ REQUIRED_KEYWORDS = {
 # Filters with weights (sum = 100). Each scoring rule is a regex/keyword check.
 # 80+ -> create immediately, 65-80 -> test, < 65 -> skip.
 SCORING_WEIGHTS = {
-    "curiosity_gap": 20,
-    "emotion":       15,
-    "proven_demand": 15,
-    "recency":       10,
-    "mass_appeal":   10,
-    "retention":     15,
-    "rewatch":       10,
-    "share":          5,
+    "curiosity_gap": 20, # Does this create “I need to know the answer”?
+    "emotion":       15, # Surprise, shock, humor, fear, motivation?
+    "proven_demand": 15, # Has this format already hit 100k+–1M+ views repeatedly?
+    "recency":       10, # Is it tied to something people are talking about now?
+    "mass_appeal":   10, # Can a 13-year-old and a 35-year-old understand it instantly?
+    "retention":     15, # Can I keep people till the last second?
+    "rewatch":       10, # Will people watch again to catch details?
+    "share":          5, # Will people send it to friends?
 }
 
 # Keyword indicators per filter. Lower-cased substring match against the headline.
-# This is a heuristic stand-in for what a human would judge; LLM can override later.
 SCORING_INDICATORS = {
     "curiosity_gap": (
         "secret", "nobody knows", "hidden", "trick", "hack", "kya", "kaise",
         "why", "how", "no one tells", "they don't", "schools never", "nobody talks",
-        "shocking", "reveal", "exposed", "truth about", "what really",
+        "shocking", "reveal", "exposed", "truth about", "what really", "unexpected",
+        "unusual", "rare", "forbidden", "unseen", "mystery",
     ),
     "emotion": (
         "shock", "surprise", "scary", "warning", "loss", "lost", "destroy",
         "viral", "killing", "exposed", "scam", "fraud", "rs ", "₹", "crore",
-        "lakh", "billion", "million", "first time", "never seen",
+        "lakh", "billion", "million", "first time", "never seen", "insane",
+        "mind-blowing", "heartbreaking", "inspiring", "motivation", "angry",
+        "danger", "safe", "mistake", "regret",
     ),
     "proven_demand": (
-        # patterns we already know perform - listicles, "X mistakes", "X tricks", "X things"
         "3 things", "5 things", "things you", "5 mistakes", "3 mistakes",
         "ways to", "tricks to", "hacks to", "vs", "battle", "compared",
-        "before vs after", "myth", "trends", "trending", "viral",
+        "before vs after", "myth", "trends", "trending", "viral", "challenge",
+        "transformation", "routine", "day in life", "review", "worth it",
     ),
     "recency": (
         "2026", "today", "this week", "just announced", "new", "latest",
-        "launched", "released", "rolled out", "yesterday",
+        "launched", "released", "rolled out", "yesterday", "breaking",
+        "update", "now available", "soon", "imminent",
     ),
     "mass_appeal": (
         "everyone", "students", "salary", "job", "career", "phone", "whatsapp",
         "youtube", "instagram", "school", "college", "exam", "interview",
-        "money", "tax", "ai", "chatgpt", "gemini",
+        "money", "tax", "ai", "chatgpt", "gemini", "iphone", "android",
+        "free", "earn", "save", "home", "life", "health",
     ),
     "retention": (
-        # signals a payoff structure
         "step", "method", "trick", "watch till end", "till the end",
         "twist", "but here's the catch", "wait for it", "you won't believe",
+        "last one", "finally", "outcome", "result", "reveal",
     ),
     "rewatch": (
         "easter egg", "did you notice", "missed detail", "every detail",
-        "frame by frame", "blink and you'll miss",
+        "frame by frame", "blink and you'll miss", "did you see", "watch carefully",
+        "re-watch", "loop", "smooth", "satisfying",
     ),
     "share": (
         "send to friend", "tag a friend", "everyone needs", "must know",
-        "share with", "your friend",
+        "share with", "your friend", "family", "group", "whatsapp status",
+        "useful", "important", "alert",
     ),
 }
 
@@ -314,13 +320,7 @@ def _youtube_search_titles(query, max_items=10):
 
 
 def research_topic_for_channel(channel_id):
-    """Pull recent India-relevant headlines + YouTube Shorts titles for the niche,
-    score each by the retention framework (curiosity gap, emotion, demand, recency,
-    mass appeal, retention, rewatch, share -> total 100), and return the
-    highest-scoring topic seed.
-
-    Topics scoring 80+ are great. 65-80 are tested. <65 are skipped (we relax
-    the bar at the end if nothing qualifies, so the agent always returns something)."""
+    """Returns (title, score, reasons)"""
     queries = TREND_QUERIES.get(channel_id, [])
     keywords = REQUIRED_KEYWORDS.get(channel_id, ())
     pool = []  # (title, source, link)
@@ -331,27 +331,25 @@ def research_topic_for_channel(channel_id):
             pool.append((it["title"], "news", it["link"]))
 
     # Source 2: actual YouTube Shorts titles already going viral in the niche.
-    # If the SAME structural pattern appears across multiple titles, it works.
     yt_titles = []
-    for q in queries[:2]:  # only 2 queries to stay polite
+    for q in queries[:2]:
         yt_titles += _youtube_search_titles(q, max_items=8)
     for t in yt_titles:
         pool.append((t, "youtube", ""))
 
     if not pool:
-        return None
+        return None, 0, {}
 
-    # Niche filter (relaxed if it leaves us empty).
+    # Niche filter
     def in_niche(title):
         tl = title.lower()
         return (not keywords) or any(k in tl for k in keywords)
 
     in_niche_pool = [p for p in pool if in_niche(p[0])]
     if not in_niche_pool:
-        in_niche_pool = pool  # fall back to broad pool
+        in_niche_pool = pool
 
-    # 3x3 pattern detection: if a 3-gram appears across 3+ YouTube titles, those
-    # patterns get a +10 bonus because the structure is proven.
+    # 3x3 pattern detection
     yt_pool_titles = [t for (t, src, _) in pool if src == "youtube"]
     pattern_freq = {}
     for t in yt_pool_titles:
@@ -365,12 +363,10 @@ def research_topic_for_channel(channel_id):
     scored = []
     for title, source, link in in_niche_pool:
         s, reasons = _score_topic(title)
-        # 3x3 pattern bonus
         tl = title.lower()
         if any(tri in tl for tri in proven_trigrams):
             s = min(100, s + 10)
             reasons["3x3_pattern"] = 10
-        # YouTube-sourced topics also get +5 because they're proven format vs raw news
         if source == "youtube":
             s = min(100, s + 5)
             reasons["youtube_source"] = 5
@@ -381,7 +377,7 @@ def research_topic_for_channel(channel_id):
     for s, t, src, _ in scored[:5]:
         _safe_print(f"  {s:3d}  {src:7s}  {t[:80]}")
 
-    # Pick the highest-scoring. Threshold: prefer 80+, then 65+, then anything.
+    # Pick the highest-scoring.
     chosen = None
     for s, t, src, reasons in scored:
         if s >= 80:
@@ -393,13 +389,13 @@ def research_topic_for_channel(channel_id):
     if not chosen and scored:
         chosen = scored[0]
     if not chosen:
-        return None
+        return None, 0, {}
 
     score, title, source, reasons = chosen
     title = _reframe_topic(title, channel_id)
     bucket = ("CREATE" if score >= 80 else "TEST" if score >= 65 else "WEAK")
     _safe_print(f"[trends] {channel_id} -> [{bucket} score={score}] {title}")
-    return title
+    return title, score, reasons
 
 
 # ---------------------------------------------------------------- SEO
@@ -497,7 +493,7 @@ def generate_thumbnail(seo, render_dir, channel_cfg):
 def run_one_channel(channel_id, dry_run=False):
     """Returns a dict with the day's result for this channel, or None on hard error."""
     print(f"\n========== {channel_id.upper()} ==========")
-    topic = research_topic_for_channel(channel_id)
+    topic, score, reasons = research_topic_for_channel(channel_id)
     if not topic:
         return {"channel": channel_id, "error": "no trending topic found"}
 
@@ -508,7 +504,7 @@ def run_one_channel(channel_id, dry_run=False):
     try:
         raw = generate_script.generate(channel_id, topic)
     except SystemExit as e:
-        return {"channel": channel_id, "error": str(e), "topic": topic}
+        return {"channel": channel_id, "error": str(e), "topic": topic, "score": score, "reasons": reasons}
     raw = raw.strip()
     if raw.startswith("```"):
         raw = re.sub(r"^```(?:json)?\s*", "", raw)
@@ -516,7 +512,7 @@ def run_one_channel(channel_id, dry_run=False):
     try:
         job = json.loads(raw)
     except json.JSONDecodeError as e:
-        return {"channel": channel_id, "error": f"LLM returned invalid JSON: {e}", "topic": topic, "raw": raw[:600]}
+        return {"channel": channel_id, "error": f"LLM returned invalid JSON: {e}", "topic": topic, "score": score, "reasons": reasons, "raw": raw[:600]}
     job["channel"] = channel_id
     job.setdefault("music", "music/bgm.mp3")
     os.makedirs(os.path.dirname(job_path), exist_ok=True)
@@ -525,25 +521,25 @@ def run_one_channel(channel_id, dry_run=False):
     print(f"[agent] job file: {job_path}")
 
     if dry_run:
-        return {"channel": channel_id, "topic": topic, "job_path": job_path, "dry_run": True, "job": job}
+        return {"channel": channel_id, "topic": topic, "score": score, "reasons": reasons, "job_path": job_path, "dry_run": True, "job": job}
 
     # 2) render
     cmd = [sys.executable, os.path.join(SCRIPT_DIR, "make_video.py"), "--job", job_path]
     print(f"[agent] rendering: {' '.join(cmd)}")
     res = subprocess.run(cmd, cwd=PROJECT_ROOT)
     if res.returncode != 0:
-        return {"channel": channel_id, "topic": topic, "job_path": job_path, "error": "render failed"}
+        return {"channel": channel_id, "topic": topic, "score": score, "reasons": reasons, "job_path": job_path, "error": "render failed"}
 
     # find latest render dir for this slug
     rdir_root = os.path.join(PROJECT_ROOT, "channels", channel_id, "renders")
     candidates = [d for d in os.listdir(rdir_root) if d.startswith(generate_script._slugify(job.get("title", slug)))]
     candidates.sort(reverse=True)
     if not candidates:
-        return {"channel": channel_id, "topic": topic, "job_path": job_path, "error": "render dir not found"}
+        return {"channel": channel_id, "topic": topic, "score": score, "reasons": reasons, "job_path": job_path, "error": "render dir not found"}
     render_dir = os.path.join(rdir_root, candidates[0])
     output_mp4 = os.path.join(render_dir, "output.mp4")
     if not os.path.exists(output_mp4):
-        return {"channel": channel_id, "topic": topic, "job_path": job_path, "error": "output.mp4 missing"}
+        return {"channel": channel_id, "topic": topic, "score": score, "reasons": reasons, "job_path": job_path, "error": "output.mp4 missing"}
 
     # 3) SEO
     channel_cfg = generate_script._load_channel(channel_id)
@@ -558,6 +554,8 @@ def run_one_channel(channel_id, dry_run=False):
     return {
         "channel": channel_id,
         "topic": topic,
+        "score": score,
+        "reasons": reasons,
         "job_path": job_path,
         "render_dir": render_dir,
         "output_mp4": output_mp4,
@@ -586,8 +584,12 @@ def send_email(results, smtp_server="smtp.gmail.com", smtp_port=465):
             rows.append(f"<h3>❌ {ch}</h3><p>Error: {r['error']}</p><p>Topic attempted: {r.get('topic','-')}</p>")
             continue
         seo = r.get("seo", {})
+        reasons = r.get("reasons", {})
+        score_html = "".join([f"<li>{k}: {v}</li>" for k, v in reasons.items()])
         rows.append(
             f"<h3>✅ {ch}</h3>"
+            f"<p><b>Viral Score: {r.get('score', 0)}/100</b> (Hook probability: HIGH)</p>"
+            f"<ul>{score_html}</ul>"
             f"<p><b>Topic:</b> {r.get('topic','-')}</p>"
             f"<p><b>YouTube title:</b> {seo.get('youtube_title','-')}</p>"
             f"<p><b>Video file:</b> <code>{r.get('output_mp4','-')}</code></p>"
@@ -616,9 +618,69 @@ def send_email(results, smtp_server="smtp.gmail.com", smtp_port=465):
     msg.set_content(text_body)
     msg.add_alternative(html_body, subtype="html")
 
+    # Attach videos and thumbnails
+    total_size = 0
+    MAX_EMAIL_SIZE = 25 * 1024 * 1024 # 25MB safety limit
+    for r in results:
+        if r.get("error"):
+            continue
+        
+        # 1) Attach Video
+        vpath = r.get("output_mp4")
+        if vpath and os.path.exists(vpath):
+            vsize = os.path.getsize(vpath)
+            
+            # If video is too large for email, try to compress it
+            if vsize >= MAX_EMAIL_SIZE:
+                print(f"[email] video {vpath} is too large ({vsize/1024/1024:.1f} MB). Compressing...")
+                compressed_path = vpath.replace(".mp4", "_email.mp4")
+                # Crf 28 is a good balance for email
+                cmd = ["ffmpeg", "-y", "-i", vpath, "-vcodec", "libx264", "-crf", "28", "-preset", "faster", "-acodec", "aac", "-b:a", "128k", compressed_path]
+                try:
+                    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    if os.path.exists(compressed_path):
+                        vpath = compressed_path
+                        vsize = os.path.getsize(vpath)
+                        print(f"[email] compressed to {vsize/1024/1024:.1f} MB")
+                except Exception as e:
+                    print(f"[email] compression failed: {e}")
+
+            if vsize < MAX_EMAIL_SIZE:
+                try:
+                    with open(vpath, "rb") as f:
+                        msg.add_attachment(
+                            f.read(),
+                            maintype="video",
+                            subtype="mp4",
+                            filename=f"{r['channel']}_{os.path.basename(vpath)}"
+                        )
+                    total_size += vsize
+                    print(f"[email] attached video: {vpath} ({vsize/1024/1024:.1f} MB)")
+                except Exception as e:
+                    print(f"[email] failed to attach video {vpath}: {e}")
+            else:
+                print(f"[email] skipping video attachment (limit reached even after compression): {vpath}")
+
+        # 2) Attach Thumbnail
+        tpath = r.get("thumbnail")
+        if tpath and os.path.exists(tpath):
+            tsize = os.path.getsize(tpath)
+            if total_size + tsize < MAX_EMAIL_SIZE:
+                try:
+                    with open(tpath, "rb") as f:
+                        msg.add_attachment(
+                            f.read(),
+                            maintype="image",
+                            subtype="jpeg",
+                            filename=f"{r['channel']}_thumbnail.jpg"
+                        )
+                    total_size += tsize
+                except Exception as e:
+                    print(f"[email] failed to attach thumbnail {tpath}: {e}")
+
     ctx = ssl.create_default_context()
     try:
-        with smtplib.SMTP_SSL(smtp_server, smtp_port, context=ctx, timeout=60) as server:
+        with smtplib.SMTP_SSL(smtp_server, smtp_port, context=ctx, timeout=300) as server:
             server.login(sender, app_pw)
             server.send_message(msg)
         print(f"[email] sent summary to {recipient}")
@@ -642,7 +704,10 @@ def main():
     for ch in channels:
         try:
             r = run_one_channel(ch, dry_run=args.dry_run)
-            results.append(r or {"channel": ch, "error": "no result"})
+            if r:
+                results.append(r)
+                if not args.dry_run and not args.no_email:
+                    send_email([r])
         except Exception as e:
             print(f"[agent] {ch} fatal: {e}")
             results.append({"channel": ch, "error": str(e)})
@@ -653,9 +718,6 @@ def main():
             print(f"  {r['channel']}: ERROR - {r['error']}")
         else:
             print(f"  {r['channel']}: OK -> {r.get('output_mp4', r.get('job_path','?'))}")
-
-    if not args.dry_run and not args.no_email:
-        send_email(results)
 
 
 if __name__ == "__main__":
