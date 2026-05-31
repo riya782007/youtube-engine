@@ -11,7 +11,7 @@
       @font-face { font-family: "Inter"; src: url("fonts/Inter-Bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
       @font-face { font-family: "Inter"; src: url("fonts/Inter-ExtraBold.ttf") format("truetype"); font-weight: 800; font-display: block; }
       @font-face { font-family: "Inter"; src: url("fonts/Inter-Black.ttf") format("truetype"); font-weight: 900; font-display: block; }
-      
+
       :root {
         --bg-from: {{BG_FROM}};
         --bg-to: {{BG_TO}};
@@ -20,104 +20,73 @@
         --kicker: {{KICKER_COLOR}};
         --text: {{TEXT_COLOR}};
       }
-      
+
       * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body {
         width: 1080px; height: 1920px; overflow: hidden;
         background-color: var(--bg-to);
         font-family: "Inter", "Baloo 2", system-ui, sans-serif;
       }
-      
+
       #root { position: relative; width: 1080px; height: 1920px; }
-      #stage { position: absolute; inset: 0; }
+      #stage { position: absolute; inset: 0; transform-origin: 50% 50%; }
 
-      /* Layer 1: Background & B-roll */
-      .bg { position: absolute; inset: 0; z-index: 0; background: radial-gradient(circle, var(--bg-from), var(--bg-to)); }
-      .broll { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
-      .scrim { position: absolute; inset: 0; z-index: 2; background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent 20%, transparent 80%, rgba(0,0,0,0.6)); }
+      /* Layer 0/1: background gradient + moving B-roll */
+      .bg { position: absolute; inset: 0; z-index: 0; background: radial-gradient(circle at 50% 38%, var(--bg-from), var(--bg-to) 75%); }
+      .broll { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; opacity: 0; will-change: transform, opacity; }
 
-      /* Layer 3: Subtitles / Captions */
+      /* Layer 2: readability scrim + colour grade + vignette */
+      .scrim { position: absolute; inset: 0; z-index: 2; background: linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.05) 22%, rgba(0,0,0,0.05) 62%, rgba(0,0,0,0.82)); }
+      .grade { position: absolute; inset: 0; z-index: 3; mix-blend-mode: soft-light; opacity: 0.5;
+               background: radial-gradient(circle at 50% 40%, var(--accent), transparent 60%); }
+      .vignette { position: absolute; inset: 0; z-index: 4; pointer-events: none;
+                  box-shadow: inset 0 0 320px 80px rgba(0,0,0,0.75); }
+
+      /* Glow puck that pulses behind the caption on each scene change */
+      .glow { position: absolute; left: 50%; top: 58%; width: 900px; height: 900px; z-index: 5;
+              transform: translate(-50%, -50%) scale(0.6); opacity: 0; pointer-events: none;
+              background: radial-gradient(circle, var(--accent) 0%, transparent 62%); filter: blur(20px); }
+
+      /* Layer 100: captions */
       .captions-container {
-        position: absolute;
-        bottom: 700px;
-        left: 0;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 100;
-        text-align: center;
-        padding: 0 80px;
+        position: absolute; bottom: 560px; left: 0; width: 100%;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        z-index: 100; text-align: center; padding: 0 70px;
       }
-
       .caption-group {
-        position: absolute;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        opacity: 0;
-        visibility: hidden;
+        position: absolute; width: 100%;
+        display: flex; flex-direction: column; align-items: center;
+        opacity: 0; visibility: hidden;
       }
-
+      .icon-burst { font-size: 150px; line-height: 1; margin-bottom: 14px; filter: drop-shadow(0 12px 26px rgba(0,0,0,0.55)); }
       .kicker-box {
-        background: var(--accent);
-        color: #000;
-        padding: 8px 24px;
-        border-radius: 12px;
-        font-weight: 900;
-        font-size: 42px;
-        text-transform: uppercase;
-        margin-bottom: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        color: #07070f; padding: 10px 30px; border-radius: 16px;
+        font-family: "Inter", sans-serif; font-weight: 900; font-size: 46px;
+        letter-spacing: 1px; text-transform: uppercase; margin-bottom: 26px;
+        box-shadow: 0 14px 38px rgba(0,0,0,0.45);
       }
-
       .line-text {
-        font-size: 110px;
-        font-weight: 900;
-        color: #fff;
-        line-height: 1.1;
-        text-transform: uppercase;
-        text-shadow: 0 10px 30px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8);
+        font-family: "Inter", "Baloo 2", sans-serif; font-weight: 900;
+        color: var(--text); line-height: 1.08; text-transform: uppercase;
+        text-shadow: 0 8px 26px rgba(0,0,0,0.95), 0 0 14px rgba(0,0,0,0.7);
+        -webkit-text-stroke: 2px rgba(0,0,0,0.55);
       }
-
-      .word { display: inline-block; white-space: pre; }
-      .accent { color: var(--accent); }
+      .word { display: inline-block; white-space: pre; will-change: transform, opacity; }
+      .accent  { color: var(--accent); }
       .accent2 { color: var(--accent2); }
 
-      /* Layer 4: Branding & Watermark */
+      /* Branding */
       .watermark {
-        position: absolute;
-        top: 80px;
-        left: 80px;
-        font-size: 40px;
-        font-weight: 900;
-        color: #fff;
-        opacity: 0.6;
-        text-transform: uppercase;
-        letter-spacing: 4px;
-        z-index: 20;
+        position: absolute; top: 70px; left: 70px; z-index: 30;
+        font-family: "Inter", sans-serif; font-size: 38px; font-weight: 900;
+        color: #fff; opacity: 0.55; text-transform: uppercase; letter-spacing: 5px;
+        display: flex; align-items: center; gap: 14px;
       }
-
-      .progress-bar {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        height: 15px;
-        background: var(--accent);
-        width: 0%;
-        z-index: 20;
-      }
-
-      .flash {
-        position: absolute;
-        inset: 0;
-        background: #fff;
-        opacity: 0;
-        z-index: 30;
-        pointer-events: none;
-      }
+      .watermark .motif { font-size: 46px; letter-spacing: 0; }
+      .progress-bar { position: absolute; bottom: 0; left: 0; height: 14px; width: 0%;
+                      background: linear-gradient(90deg, var(--accent), var(--accent2)); z-index: 30; }
+      .flash { position: absolute; inset: 0; background: #fff; opacity: 0; z-index: 40; pointer-events: none; }
     </style>
   </head>
   <body>
@@ -126,59 +95,74 @@
         <div class="bg"></div>
         {{BROLL_TRACKS}}
         <div class="scrim"></div>
-        
+        <div class="grade"></div>
+        <div class="vignette"></div>
+        <div class="glow"></div>
+
         <div class="captions-container">
-          <div id="cg-1" class="caption-group" data-at="{{CAP1_AT}}" data-len="{{CAP1_LEN}}">
+          <div id="cg-1" class="caption-group" data-at="{{CAP1_AT}}" data-len="{{CAP1_LEN}}" data-wordtimes="{{CAP1_WORDTIMES}}">
+            <div class="icon-burst">{{CAP1_ICON}}</div>
             <div class="kicker-box">{{CAP1_KICKER}}</div>
             <div class="line-text">{{CAP1_LINE}}</div>
           </div>
-          <div id="cg-2" class="caption-group" data-at="{{CAP2_AT}}" data-len="{{CAP2_LEN}}">
+          <div id="cg-2" class="caption-group" data-at="{{CAP2_AT}}" data-len="{{CAP2_LEN}}" data-wordtimes="{{CAP2_WORDTIMES}}">
+            <div class="icon-burst">{{CAP2_ICON}}</div>
             <div class="kicker-box">{{CAP2_KICKER}}</div>
             <div class="line-text">{{CAP2_LINE}}</div>
           </div>
-          <div id="cg-3" class="caption-group" data-at="{{CAP3_AT}}" data-len="{{CAP3_LEN}}">
+          <div id="cg-3" class="caption-group" data-at="{{CAP3_AT}}" data-len="{{CAP3_LEN}}" data-wordtimes="{{CAP3_WORDTIMES}}">
+            <div class="icon-burst">{{CAP3_ICON}}</div>
             <div class="kicker-box">{{CAP3_KICKER}}</div>
             <div class="line-text">{{CAP3_LINE}}</div>
           </div>
-          <div id="cg-4" class="caption-group" data-at="{{CAP4_AT}}" data-len="{{CAP4_LEN}}">
+          <div id="cg-4" class="caption-group" data-at="{{CAP4_AT}}" data-len="{{CAP4_LEN}}" data-wordtimes="{{CAP4_WORDTIMES}}">
+            <div class="icon-burst">{{CAP4_ICON}}</div>
             <div class="kicker-box">{{CAP4_KICKER}}</div>
             <div class="line-text">{{CAP4_LINE}}</div>
           </div>
-          <div id="cg-5" class="caption-group" data-at="{{CAP5_AT}}" data-len="{{CAP5_LEN}}">
+          <div id="cg-5" class="caption-group" data-at="{{CAP5_AT}}" data-len="{{CAP5_LEN}}" data-wordtimes="{{CAP5_WORDTIMES}}">
+            <div class="icon-burst">{{CAP5_ICON}}</div>
             <div class="kicker-box">{{CAP5_KICKER}}</div>
             <div class="line-text">{{CAP5_LINE}}</div>
           </div>
-          <div id="cg-6" class="caption-group" data-at="{{CAP6_AT}}" data-len="{{CAP6_LEN}}">
+          <div id="cg-6" class="caption-group" data-at="{{CAP6_AT}}" data-len="{{CAP6_LEN}}" data-wordtimes="{{CAP6_WORDTIMES}}">
+            <div class="icon-burst">{{CAP6_ICON}}</div>
             <div class="kicker-box">{{CAP6_KICKER}}</div>
             <div class="line-text">{{CAP6_LINE}}</div>
           </div>
-          <div id="cg-7" class="caption-group" data-at="{{CAP7_AT}}" data-len="{{CAP7_LEN}}">
+          <div id="cg-7" class="caption-group" data-at="{{CAP7_AT}}" data-len="{{CAP7_LEN}}" data-wordtimes="{{CAP7_WORDTIMES}}">
+            <div class="icon-burst">{{CAP7_ICON}}</div>
             <div class="kicker-box">{{CAP7_KICKER}}</div>
             <div class="line-text">{{CAP7_LINE}}</div>
           </div>
-          <div id="cg-8" class="caption-group" data-at="{{CAP8_AT}}" data-len="{{CAP8_LEN}}">
+          <div id="cg-8" class="caption-group" data-at="{{CAP8_AT}}" data-len="{{CAP8_LEN}}" data-wordtimes="{{CAP8_WORDTIMES}}">
+            <div class="icon-burst">{{CAP8_ICON}}</div>
             <div class="kicker-box">{{CAP8_KICKER}}</div>
             <div class="line-text">{{CAP8_LINE}}</div>
           </div>
-          <div id="cg-9" class="caption-group" data-at="{{CAP9_AT}}" data-len="{{CAP9_LEN}}">
+          <div id="cg-9" class="caption-group" data-at="{{CAP9_AT}}" data-len="{{CAP9_LEN}}" data-wordtimes="{{CAP9_WORDTIMES}}">
+            <div class="icon-burst">{{CAP9_ICON}}</div>
             <div class="kicker-box">{{CAP9_KICKER}}</div>
             <div class="line-text">{{CAP9_LINE}}</div>
           </div>
-          <div id="cg-10" class="caption-group" data-at="{{CAP10_AT}}" data-len="{{CAP10_LEN}}">
+          <div id="cg-10" class="caption-group" data-at="{{CAP10_AT}}" data-len="{{CAP10_LEN}}" data-wordtimes="{{CAP10_WORDTIMES}}">
+            <div class="icon-burst">{{CAP10_ICON}}</div>
             <div class="kicker-box">{{CAP10_KICKER}}</div>
             <div class="line-text">{{CAP10_LINE}}</div>
           </div>
-          <div id="cg-11" class="caption-group" data-at="{{CAP11_AT}}" data-len="{{CAP11_LEN}}">
+          <div id="cg-11" class="caption-group" data-at="{{CAP11_AT}}" data-len="{{CAP11_LEN}}" data-wordtimes="{{CAP11_WORDTIMES}}">
+            <div class="icon-burst">{{CAP11_ICON}}</div>
             <div class="kicker-box">{{CAP11_KICKER}}</div>
             <div class="line-text">{{CAP11_LINE}}</div>
           </div>
-          <div id="cg-12" class="caption-group" data-at="{{CAP12_AT}}" data-len="{{CAP12_LEN}}">
+          <div id="cg-12" class="caption-group" data-at="{{CAP12_AT}}" data-len="{{CAP12_LEN}}" data-wordtimes="{{CAP12_WORDTIMES}}">
+            <div class="icon-burst">{{CAP12_ICON}}</div>
             <div class="kicker-box">{{CAP12_KICKER}}</div>
             <div class="line-text">{{CAP12_LINE}}</div>
           </div>
         </div>
 
-        <div class="watermark">{{WATERMARK}}</div>
+        <div class="watermark"><span class="motif">{{MOTIF}}</span><span>{{WATERMARK}}</span></div>
         <div class="progress-bar"></div>
         <div class="flash"></div>
       </div>
@@ -189,106 +173,128 @@
     </div>
 
     <script>
+      // ----------------------------------------------------------------------
+      // All motion is GSAP-timeline driven (NOT CSS animation) because the
+      // renderer seeks the timeline frame-by-frame. window.__timelines["main"]
+      // is the contract hyperframes drives.
+      //
+      // CAPTION SYNC: each group carries data-wordtimes = a JSON array of reveal
+      // offsets (seconds, relative to the scene start) computed in make_video.py
+      // from the ACTUAL voiceover word onsets (faster-whisper). So each caption
+      // word pops exactly when a word is spoken. Falls back to a stagger if the
+      // array is missing/short.
+      // ----------------------------------------------------------------------
       window.__timelines = window.__timelines || {};
+      window.__hfWords = {{WORD_DATA}};
       const root = document.getElementById("root");
       const duration = parseFloat(root.dataset.duration);
       const tl = gsap.timeline({ paused: true });
 
-      // Subtle background zoom
-      tl.to("#stage", { scale: 1.05, duration: duration, ease: "none" }, 0);
+      // Slow, continuous "breathing" zoom on the whole stage so the frame is never static.
+      tl.fromTo("#stage", { scale: 1.0 }, { scale: 1.06, duration: duration, ease: "none" }, 0);
 
-      // B-roll transitions
+      // B-roll: fade in, slow Ken Burns push, crossfade out before the next clip.
       const brolls = document.querySelectorAll(".broll");
       brolls.forEach((v, i) => {
         const start = parseFloat(v.dataset.at);
-        const len = parseFloat(v.dataset.len);
-        tl.to(v, { opacity: 1, duration: 0.4 }, start);
-        tl.fromTo(v, { scale: 1.2 }, { scale: 1, duration: len, ease: "none" }, start);
+        const len = parseFloat(v.dataset.len) || 3;
+        tl.to(v, { opacity: 1, duration: 0.45, ease: "power1.out" }, Math.max(0, start - 0.15));
+        tl.fromTo(v, { scale: 1.22, xPercent: i % 2 ? 2 : -2 },
+                     { scale: 1.0, xPercent: 0, duration: len + 0.6, ease: "none" }, start);
         if (i < brolls.length - 1) {
-          tl.to(v, { opacity: 0, duration: 0.4 }, start + len - 0.2);
+          tl.to(v, { opacity: 0, duration: 0.45, ease: "power1.in" }, start + len - 0.2);
         }
       });
 
-      // Captions & Subtitles
+      // Auto-fit: shrink very long caption lines so 3-word Hindi phrases never overflow.
+      function fitFontSize(lineEl) {
+        const len = (lineEl.textContent || "").trim().length;
+        if (len > 26) return 78;
+        if (len > 18) return 92;
+        if (len > 12) return 104;
+        return 116;
+      }
+
       const groups = document.querySelectorAll(".caption-group");
-      groups.forEach((group, i) => {
+      groups.forEach((group) => {
         const start = parseFloat(group.dataset.at);
         const len = parseFloat(group.dataset.len);
-        if (len <= 0) return;
+        if (!len || len <= 0) return;
 
-        // Entrance
+        // Voiceover-synced per-word reveal offsets (seconds, relative to start).
+        let wordTimes = [];
+        try { wordTimes = JSON.parse(group.dataset.wordtimes || "[]"); } catch (e) { wordTimes = []; }
+
+        // Glow pulse behind the caption on entry.
+        tl.fromTo(".glow", { opacity: 0, scale: 0.6 },
+                  { opacity: 0.4, scale: 1.0, duration: 0.35, ease: "power2.out" }, start);
+        tl.to(".glow", { opacity: 0, duration: 0.5, ease: "power2.in" }, start + 0.45);
+
+        // Group on.
         tl.set(group, { visibility: "visible" }, start);
-        tl.to(group, { opacity: 1, duration: 0.1 }, start);
-        
-        const kicker = group.querySelector(".kicker-box");
-        if (kicker && kicker.textContent.trim()) {
-            tl.from(kicker, { y: 20, opacity: 0, scale: 0.8, duration: 0.4, ease: "back.out(2)" }, start);
+        tl.to(group, { opacity: 1, duration: 0.12 }, start);
+
+        // Icon "reaction burst".
+        const icon = group.querySelector(".icon-burst");
+        if (icon && icon.textContent.trim()) {
+          tl.fromTo(icon, { scale: 0, y: 30, rotation: -12 },
+                    { scale: 1, y: 0, rotation: 0, duration: 0.45, ease: "back.out(2.2)" }, start);
+        } else if (icon) {
+          icon.style.display = "none";
         }
 
+        // Kicker pill pop.
+        const kicker = group.querySelector(".kicker-box");
+        if (kicker && kicker.textContent.trim()) {
+          tl.fromTo(kicker, { y: 24, opacity: 0, scale: 0.82 },
+                    { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, start + 0.05);
+        } else if (kicker) {
+          kicker.style.display = "none";
+        }
+
+        // Split the line into word spans (preserving accent markup + line breaks).
         const line = group.querySelector(".line-text");
-        // Split line into words for punchy reveal
-        const words = line.innerHTML.split(/(\s+|<br\/?>)/);
+        line.style.fontSize = fitFontSize(line) + "px";
+        const wordsMarkup = line.innerHTML.split(/(\s+|<br\/?>)/);
         line.innerHTML = "";
-        words.forEach(w => {
-            if (w.match(/<br\/?>/)) {
-                line.appendChild(document.createElement("br"));
-            } else if (w.trim()) {
-                const span = document.createElement("span");
-                span.className = "word";
-                span.innerHTML = w;
-                line.appendChild(span);
-            } else {
-                line.appendChild(document.createTextNode(w));
-            }
+        wordsMarkup.forEach((w) => {
+          if (/^<br\/?>$/.test(w)) {
+            line.appendChild(document.createElement("br"));
+          } else if (w.trim()) {
+            const span = document.createElement("span");
+            span.className = "word";
+            span.innerHTML = w;
+            line.appendChild(span);
+          } else if (w.length) {
+            line.appendChild(document.createTextNode(w));
+          }
         });
 
+        // Reveal each word AT ITS SPOKEN TIME (data-wordtimes), so text === voice.
         const wordSpans = line.querySelectorAll(".word");
-        tl.from(wordSpans, { 
-            scale: 0, 
-            opacity: 0, 
-            y: 40, 
-            duration: 0.3, 
-            stagger: 0.05, 
-            ease: "back.out(3)" 
-        }, start + 0.1);
-
-        // Flash on scene change
-        tl.to(".flash", { opacity: 0.2, duration: 0.05, yoyo: true, repeat: 1 }, start);
-
-        // Exit
-        const exitAt = start + len;
-        tl.to(group, { opacity: 0, scale: 0.9, duration: 0.2 }, exitAt - 0.2);
-        tl.set(group, { visibility: "hidden" }, exitAt);
-      });
-
-      // Progress bar
-      tl.to(".progress-bar", { width: "100%", duration: duration, ease: "none" }, 0);
-
-      window.__timelines["main"] = tl;
-    </script>
-  </body>
-</html>
-0, 
-                opacity: 0, 
-                y: 40, 
-                duration: 0.25, 
-                ease: "back.out(3)" 
-            }, revealAt);
-            
-            // Add a little "pulse" when it hits
-            tl.to(span, { scale: 1.2, duration: 0.1, yoyo: true, repeat: 1 }, revealAt);
+        wordSpans.forEach((span, j) => {
+          let off = (j < wordTimes.length) ? wordTimes[j]
+                                           : (wordTimes.length ? wordTimes[wordTimes.length - 1] + (j - wordTimes.length + 1) * 0.12
+                                                               : 0.18 + j * 0.12);
+          // never let a reveal spill past the scene
+          off = Math.min(off, Math.max(0, len - 0.15));
+          const at = start + off;
+          tl.fromTo(span, { scale: 0.3, opacity: 0, y: 36 },
+                    { scale: 1, opacity: 1, y: 0, duration: 0.24, ease: "back.out(3)" }, at);
+          // satisfying punch on landing
+          tl.to(span, { scale: 1.16, duration: 0.09, yoyo: true, repeat: 1, ease: "power1.inOut" }, at + 0.16);
         });
 
-        // Flash on scene change
-        tl.to(".flash", { opacity: 0.2, duration: 0.05, yoyo: true, repeat: 1 }, start);
+        // Quick white flash on each scene change (lands with the whoosh SFX).
+        tl.to(".flash", { opacity: 0.18, duration: 0.05, yoyo: true, repeat: 1 }, start);
 
-        // Exit
+        // Exit.
         const exitAt = start + len;
-        tl.to(group, { opacity: 0, scale: 0.9, duration: 0.2 }, exitAt - 0.2);
+        tl.to(group, { opacity: 0, scale: 0.94, duration: 0.22, ease: "power1.in" }, exitAt - 0.22);
         tl.set(group, { visibility: "hidden" }, exitAt);
       });
 
-      // Progress bar
+      // Bottom progress bar fills across the whole video.
       tl.to(".progress-bar", { width: "100%", duration: duration, ease: "none" }, 0);
 
       window.__timelines["main"] = tl;

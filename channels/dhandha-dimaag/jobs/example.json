@@ -1,15 +1,22 @@
 {
   "channel": "dhandha-dimaag",
-  "title": "Rs 99 vs Rs 100: ye pricing trick kaam kyun karti hai",
-  "description": "Har dukaan ye trick use karti hai. Business ke peeche ka dimaag.",
-  "hashtags": ["#business", "#pricing", "#marketing", "#casestudy"],
+  "title": "Automate customer support with AI for any business",
+  "description": "Chhota business? AI se customer support automate karke time aur paisa dono bachao.",
+  "hashtags": ["#shorts", "#business", "#aiforbusiness", "#automation", "#aitools"],
   "music": "music/bgm.mp3",
-  "voice": "Kabhi socha... cheezein nintyaanve rupaye mein kyun bikti hain, sau mein kyun nahi? Iske peeche ek dimaagi trick hai - ise kehte hain charm pricing. Hamara brain keemat ko left se right padhta hai, toh nintyaanve dekhte hi lagta hai - are, sau se kam hai! Farak sirf ek rupaye ka, par bikri kaafi badh jaati hai. Aise hi business ke peeche ka dimaag samajhna hai? Dhandha Dimaag ko follow karo.",
+  "voice": "Tumhara business same sawaalon ka jawaab dete dete thak gaya hai? AI se isse poora automate kar sakte ho, woh bhi bina coding. Sun lo, ye step boring kaam hamesha ke liye khatam kar dega. Pehle apne top das sawaal aur unke jawaab likho. Phir ChatGPT ya ek free chatbot tool me yeh sab daalo, isse training kehte hain. Usse apni website aur WhatsApp se jodo. Ab woh AI din raat, customer ke sawaalon ka turant jawaab dega, tumhari language me. Result? Tum bade kaam pe focus karo, AI baaki sambhaale. Aise hi business ke smart AI tareeke ke liye Dhandha Dimaag ko follow karo.",
   "captions": [
-    { "icon": "🤔", "kicker": "SOCHO", "line": "₹99 hi kyun,\n*₹100 kyun nahi*?", "broll": "store price tag shopping" },
-    { "icon": "🧠", "kicker": "TRICK", "line": "Ise kehte hain *charm pricing*", "broll": "retail store shelves products" },
-    { "icon": "👀", "kicker": "DIMAAG", "line": "Brain *left-to-right* padhta hai", "broll": "thinking person looking close" },
-    { "icon": "📈", "kicker": "ASAR", "line": "₹99 lagta hai **bahut kam**", "broll": "supermarket aisle products shelf" },
-    { "icon": "💡", "kicker": "LESSON", "line": "Farak *₹1*, bikri *badi*", "broll": "business growth success chart" }
+    { "icon": "😮‍💨", "kicker": "PROBLEM", "line": "Same sawaal *baar baar*", "broll": "frustrated business owner phone" },
+    { "icon": "🤖", "kicker": "FIX", "line": "AI se *automate*", "broll": "ai chatbot interface glowing" },
+    { "icon": "🚫", "kicker": "BONUS", "line": "Bina *coding*", "broll": "no code drag drop builder" },
+    { "icon": "📝", "kicker": "STEP 1", "line": "Top *10 sawaal*", "broll": "writing list on notepad" },
+    { "icon": "💬", "kicker": "STEP 2", "line": "Jawaab *likho*", "broll": "typing answers keyboard closeup" },
+    { "icon": "🧠", "kicker": "STEP 3", "line": "Chatbot *train*", "broll": "ai training data screen" },
+    { "icon": "🔗", "kicker": "STEP 4", "line": "Website se *jodo*", "broll": "connecting apps integration screen" },
+    { "icon": "📱", "kicker": "STEP 5", "line": "WhatsApp *bhi*", "broll": "whatsapp business chat phone" },
+    { "icon": "🌙", "kicker": "24x7", "line": "Din raat *jawaab*", "broll": "city lights night timelapse" },
+    { "icon": "🗣️", "kicker": "SMART", "line": "Tumhari *language*", "broll": "global communication network" },
+    { "icon": "🎯", "kicker": "FOCUS", "line": "Bade kaam pe *dhyaan*", "broll": "entrepreneur planning whiteboard" },
+    { "icon": "✅", "kicker": "RESULT", "line": "Time aur paisa *bacha*", "broll": "business growth success celebration" }
   ]
 }

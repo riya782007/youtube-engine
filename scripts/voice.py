@@ -62,9 +62,9 @@ MAX_RETRIES = 4
 # `temperature` trades "monotone/consistent" vs "human/expressive". These presets lean
 # slightly expressive so the delivery doesn't sound robotic, while staying stable.
 CHANNEL_PRESETS = {
-    "ai":       {"speaker": "rohan",  "pace": 1.04, "temperature": 0.72},
-    "finance":  {"speaker": "shreya", "pace": 0.98, "temperature": 0.68},
-    "business": {"speaker": "manan",  "pace": 1.0,  "temperature": 0.70},
+    "ai":       {"speaker": "aditya", "pace": 1.06, "temperature": 0.62},
+    "finance":  {"speaker": "shreya", "pace": 1.02, "temperature": 0.60},
+    "business": {"speaker": "manan",  "pace": 1.02, "temperature": 0.62},
 }
 
 # ---------------------------------------------------------------- ElevenLabs (optional)
@@ -195,12 +195,119 @@ def load_api_key():
     return key
 
 
+# ---------------------------------------------------------------- number -> Hinglish words
+# The single biggest pronunciation lever (after clean punctuation) is making sure the
+# TTS never has to "guess" how to read a digit or a symbol. Indian audiences expect
+# Hindi number words ("ninyaanve rupaye", not "ninety-nine rupees" or a flat "99").
+# The script prompt already asks the LLM to spell numbers out, but this is the safety
+# net for anything that slips through as digits / ₹ / %.
+
+# Romanized Hindi numbers 0-99 (standard spellings tuned for Bulbul/ElevenLabs).
+_HI_ONES = [
+    "shoonya", "ek", "do", "teen", "chaar", "paanch", "chhe", "saat", "aath", "nau",
+    "das", "gyaarah", "baarah", "terah", "chaudah", "pandrah", "solah", "satrah",
+    "atharah", "unnees", "bees", "ikkees", "baees", "teyees", "chaubees", "pachchees",
+    "chhabbees", "sattaees", "atthaees", "untees", "tees", "iktees", "battees",
+    "taintees", "chauntees", "paintees", "chhattees", "saintees", "adtees", "untaalees",
+    "chaalees", "iktaalees", "bayaalees", "tetaalees", "chavaalees", "paintaalees",
+    "chhiyaalees", "saitaalees", "adtaalees", "unchaas", "pachaas", "ikyaavan",
+    "baavan", "tirpan", "chauvan", "pachpan", "chhappan", "sattaavan", "atthaavan",
+    "unsaath", "saath", "iksaath", "baasaath", "tirsaath", "chausaath", "painsaath",
+    "chhiyaasaath", "sadsaath", "adsaath", "unhattar", "sattar", "ikhattar", "bahattar",
+    "tihattar", "chauhattar", "pachhattar", "chhihattar", "sathattar", "athhattar",
+    "unaasi", "assi", "ikyaasi", "bayaasi", "tiraasi", "chauraasi", "pachaasi",
+    "chhiyaasi", "sattaasi", "atthaasi", "navaasi", "nabbe", "ikyaanve", "bayaanve",
+    "tiraanve", "chauraanve", "pachaanve", "chhiyaanve", "sattaanve", "atthaanve",
+    "ninyaanve",
+]
+
+
+def _two_digit_hi(n):
+    """0-99 -> words. Assumes 0 <= n <= 99."""
+    return _HI_ONES[n] if 0 <= n < len(_HI_ONES) else str(n)
+
+
+def number_to_hindi_words(n):
+    """Convert a non-negative integer to romanized-Hindi words using the Indian
+    numbering system (crore/lakh/hazaar/sau). Good for the amounts that appear in
+    Shorts (up to a few crore). Falls back to digits for anything absurdly large."""
+    try:
+        n = int(n)
+    except Exception:
+        return str(n)
+    if n < 0:
+        return str(n)
+    if n < 100:
+        return _two_digit_hi(n)
+    if n > 999999999:          # > 99 crore: leave as-is (never happens in a script)
+        return str(n)
+    parts = []
+    crore = n // 10_000_000; n %= 10_000_000
+    lakh = n // 100_000;      n %= 100_000
+    thousand = n // 1000;     n %= 1000
+    hundred = n // 100;       n %= 100
+    if crore:
+        parts.append(f"{_two_digit_hi(crore)} crore")
+    if lakh:
+        parts.append(f"{_two_digit_hi(lakh)} lakh")
+    if thousand:
+        parts.append(f"{_two_digit_hi(thousand)} hazaar")
+    if hundred:
+        parts.append(f"{_HI_ONES[hundred]} sau")
+    if n:
+        parts.append(_two_digit_hi(n))
+    return " ".join(parts) if parts else "shoonya"
+
+
+def expand_numbers_and_symbols(text):
+    """Turn money/percent/quantity digits + symbols into spoken Hinglish words so
+    the TTS pronounces them naturally. Conservative on purpose: bare 4-digit numbers
+    (years like 2026) and version-style numbers are left untouched.
+
+    Examples:
+      ₹500            -> paanch sau rupaye
+      Rs. 25,000      -> pachchees hazaar rupaye
+      50%             -> pachaas percent
+      2 minute        -> do minute
+      3 step          -> teen step
+    """
+    if not text:
+        return text
+
+    def _digits_to_int(s):
+        return int(re.sub(r"[,\s]", "", s))
+
+    # ₹500 / ₹ 1,000  -> "<words> rupaye"
+    text = re.sub(r"₹\s*([\d,]+)",
+                  lambda m: f"{number_to_hindi_words(_digits_to_int(m.group(1)))} rupaye", text)
+    # Rs500 / Rs. 25,000 / INR 500
+    text = re.sub(r"\b(?:rs|inr)\.?\s*([\d,]+)",
+                  lambda m: f"{number_to_hindi_words(_digits_to_int(m.group(1)))} rupaye",
+                  text, flags=re.IGNORECASE)
+    # 50% / 50 %  -> "<words> percent"
+    text = re.sub(r"\b([\d,]+)\s*%",
+                  lambda m: f"{number_to_hindi_words(_digits_to_int(m.group(1)))} percent", text)
+    # number + common unit  -> spoken words ("2 minute" -> "do minute")
+    units = (r"minute|minutes|min|second|seconds|sec|ghante|ghanta|din|saal|"
+             r"mahine|mahina|hafte|hafta|rupaye|rupees|rupee|percent|log|logon|"
+             r"baar|step|steps|guna|crore|lakh|hazaar|thousand|million|billion|"
+             r"gb|mb|kb|x")
+    text = re.sub(rf"\b([\d,]+)\s+({units})\b",
+                  lambda m: f"{number_to_hindi_words(_digits_to_int(m.group(1)))} {m.group(2)}",
+                  text, flags=re.IGNORECASE)
+    # standalone symbols people sometimes leave in
+    text = text.replace("&", " aur ")
+    text = re.sub(r"\s{2,}", " ", text)
+    return text
+
+
 # ---------------------------------------------------------------- prosody normalize
 def normalize_for_speech(text):
     """Light touch-ups that help Bulbul v3 read Hinglish naturally.
 
     Bulbul v3 derives pauses/emphasis from punctuation, so we make punctuation clean
     and consistent (this is the single biggest lever on 'does it sound robotic').
+      - expand money/percent/quantity digits + symbols into spoken Hindi words
       - normalize whitespace
       - guarantee a space AFTER sentence punctuation (so words don't run together)
       - collapse 4+ dots to a 3-dot ellipsis (a natural dramatic pause)
@@ -211,11 +318,12 @@ def normalize_for_speech(text):
       - Use ? for questions and ... for a beat before a reveal.
       - Keep common English words in Latin (AI, ChatGPT, resume) - v3 handles code-mix.
       - If a specific English word is mispronounced, spell it phonetically in Devanagari.
-      - Write big numbers in words for a guaranteed reading (e.g. "ninety-nine" / "nintyaanve").
+      - Write big numbers in words for a guaranteed reading (e.g. "ninyaanve" / "ek lakh").
     """
     if not text:
         return text
     text = text.replace("\r\n", "\n").strip()
+    text = expand_numbers_and_symbols(text)          # digits/₹/% -> spoken words
     text = re.sub(r"[ \t]+", " ", text)            # collapse runs of spaces/tabs
     text = re.sub(r"\.{4,}", "...", text)           # 4+ dots -> ellipsis
     text = re.sub(r"\s+([,.!?।])", r"\1", text)     # no space before punctuation

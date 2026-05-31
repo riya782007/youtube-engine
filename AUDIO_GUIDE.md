@@ -26,49 +26,89 @@ render still works).
 
 ---
 
-## PART 1 — YouTube Audio Library (your best free source)
+## PART 1 — YouTube Audio Library (does it have "keys" / an API?)
 
-YouTube's official library is the safest option because it's pre-cleared for
-monetization and explicitly licensed for YouTube use.
+**Short, honest answer: NO.** The YouTube Audio Library has **no public API and no API keys.**
+You cannot fetch its tracks programmatically — Google only lets you **download tracks by
+hand** from YouTube Studio. (The YouTube Data API v3 covers videos, captions, playlists
+etc. — *not* the Audio Library.) So there is nothing to "insert into this project" for it.
 
-### How to access it
+Because of that, this engine gives you **two** ways to get music:
 
-1. Go to **studio.youtube.com** (you must be signed in to your channel)
-2. In the left sidebar, scroll to the bottom → click **Audio Library**
-3. You'll see two tabs at the top: **Music** and **Sound effects**
+| Path | Keys? | Effort | Best for |
+|---|---|---|---|
+| **A. YouTube Audio Library (manual)** | None — no API exists | ~5 min, one-time | Safest licensing / monetization |
+| **B. Jamendo API (automatic)** | 1 free Client ID | paste 1 line in `.env` | Fully hands-off daily pipeline |
 
-### How to download music for BGM
+Use **A** if you want the absolute safest, no-attribution music and don't mind a one-time
+manual download. Use **B** if you want the daily agent to fetch fresh music on its own
+(and to wake up beat-synced cuts). You can also do both — the manual `bgm.mp3` is used
+whenever Jamendo is off or unavailable.
 
-1. Click the **Music** tab
-2. Use the filters at the top:
-   - **Track title** — search by mood or keyword
-   - **Genre** — pick one that fits the channel
-   - **Mood** — Happy, Calm, Dramatic, Inspirational, Bright, Funky, Angry, etc.
-   - **Duration** — set min to 30 seconds
-   - **Attribution** — set to **No attribution required** (safest for monetization)
-3. Click any track to preview
-4. Click the **download arrow** (right side of the row) → saves as MP3
-5. Rename the file to `bgm.mp3` and put it at:
+### Path A — YouTube Audio Library (manual, no keys)
+
+1. Go to **studio.youtube.com** (signed in to your channel)
+2. Left sidebar (scroll down) → **Audio Library**  (or open **youtube.com/audiolibrary**)
+3. Two tabs at top: **Music** and **Sound effects**
+4. In **Music**, set the filters:
+   - **Genre / Mood** to match the channel (see search terms below)
+   - **Duration** → minimum 30 seconds
+   - **Attribution** → **No attribution required** (safest for monetization)
+5. Click a track to preview → click the **download arrow** → it saves as MP3
+6. Rename to `bgm.mp3` and place it at:
    ```
-   c:\Users\Riya yadav\youtube engine\channels\ai-tadka\music\bgm.mp3
+   channels/ai-tadka/music/bgm.mp3
+   channels/paisa-pathshala/music/bgm.mp3
+   channels/dhandha-dimaag/music/bgm.mp3
    ```
-6. Repeat for `paisa-pathshala` and `dhandha-dimaag`
+7. Done — the engine auto-detects it. (Pick a **percussive** track so beat-sync activates.)
 
-### Recommended search terms per channel (paste into the search bar)
+### Path B — Jamendo API (automatic music, with a free key)
+
+This is the closest you can get to "audio library keys". The engine ships with
+`scripts/music_library.py`, which pulls royalty-free instrumental tracks from Jamendo and
+drops a fresh, mood-matched one into every render.
+
+**Get your free Client ID (2 minutes):**
+1. Open **https://devportal.jamendo.com** and sign in / create a free account
+2. Click **Create a new application** (any name, e.g. `youtube-engine`)
+3. Copy the **Client ID** it gives you
+4. Open `.env` in the project root and add:
+   ```
+   JAMENDO_CLIENT_ID=your_client_id_here
+   ```
+5. (Optional) pre-download a music pool per mood so renders work offline:
+   ```
+   python scripts/music_library.py --tags "electronic upbeat energetic" --prefetch 6
+   python scripts/music_library.py --tags "corporate motivational positive uplifting" --prefetch 6
+   python scripts/music_library.py --tags "cinematic motivational inspiring epic" --prefetch 6
+   ```
+   (The mood tags come from each `channel.json` → `jamendo_music_tags`.)
+
+That's it. On the next render the engine fetches a track, mixes it under the voice, and
+writes a `music_credits.txt` into the render folder.
+
+> ⚠️ **Licensing:** Jamendo tracks are **Creative Commons**, and **many require attribution.**
+> The engine writes the exact attribution line to `music_credits.txt` — paste it into your
+> YouTube description when a track requires it. If you'd rather never worry about
+> attribution, use **Path A** (YouTube Audio Library, "No attribution required" filter) or
+> **Pixabay** below. Do not skip this — uncredited CC-BY music can get a copyright claim.
+
+### Recommended search terms per channel (paste into the Audio Library search bar)
 
 **AI Tadka 🤖** (energetic, modern, electronic)
 - "future tech" • "cyber" • "electronic upbeat" • "synthwave"
 - Filter: Genre = **Electronic** OR **Cinematic**, Mood = **Bright** OR **Funky**
 
-**Paisa Pathshala 🪙** (calm, confident, trustworthy)
-- "corporate" • "lo-fi piano" • "calm jazz" • "confident background"
-- Filter: Genre = **Jazz & Blues** OR **Cinematic**, Mood = **Calm** OR **Inspirational**
+**Paisa Pathshala 💰** (confident, motivating, uplifting)
+- "corporate" • "uplifting" • "positive motivational" • "future corporate"
+- Filter: Genre = **Cinematic** OR **Pop**, Mood = **Inspirational** OR **Happy**
 
 **Dhandha Dimaag 📈** (cinematic, motivational, building energy)
 - "motivational cinematic" • "epic build" • "documentary" • "inspiring orchestra"
 - Filter: Genre = **Cinematic**, Mood = **Inspirational** OR **Dramatic**
 
-### How to download SFX (whoosh + ding)
+### How to download SFX (whoosh + ding) — manual fallback
 
 1. Click the **Sound effects** tab
 2. Set **Duration**: less than 1 minute (default is fine)

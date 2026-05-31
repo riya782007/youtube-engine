@@ -19,3 +19,7 @@ __pycache__/
 *.pyc
 node_modules/
 *.log
+
+# Agent runtime state (local memory of used topics, etc.)
+scripts/state/
+scripts/logs/

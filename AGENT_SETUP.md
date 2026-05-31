@@ -21,6 +21,24 @@ Free tier: 6000 tokens/min — plenty for 3 scripts/day.
 
 ---
 
+## Step 1b — Optional media keys (better footage, music & SFX)
+
+These are all optional and free; the agent runs without them, but each one bumps quality.
+Add any you want to `.env`:
+
+- **PEXELS_API_KEY** — real stock B-roll behind every scene. Get it at pexels.com/api.
+- **ELEVENLABS_API_KEY** — the natural-voice upgrade. If present, the engine auto-switches
+  from Sarvam to ElevenLabs (far more natural Hinglish). Free tier at elevenlabs.io.
+- **FREESOUND_API_KEY** — fresh CC0 whoosh/ding SFX per render. freesound.org/apiv2/apply.
+- **JAMENDO_CLIENT_ID** — automatic royalty-free background music (also activates beat-synced
+  cuts). Free Client ID at devportal.jamendo.com. See AUDIO_GUIDE.md. Without it, the agent
+  uses whatever `bgm.mp3` you place in each `channels/<id>/music/` folder.
+
+The 11 AM run prints a **PREFLIGHT** block showing exactly which keys are active, so your
+daily log tells you at a glance what's on.
+
+---
+
 ## Step 2 — Gmail App Password (so the agent can email you)
 
 Why: Google blocks regular passwords for SMTP. App Password is required.
@@ -94,10 +112,14 @@ For each of the 3 channels in sequence:
 
 ### 2. Script generation with viral mechanics built in
 The LLM prompt enforces:
-- 4 KILLER FILTERS (one-sentence idea, payoff <30s, scroll-stop hook, open loop)
-- 8 VIRAL HOOK templates (shock claim, pattern interrupt, "Ruko" command, curiosity gap, mistake/fear, before/after, hidden truth, "schools never taught")
-- 7-beat structure: hook → loop → step1 → step2 → step3/twist → payoff → CTA
-- Channel-specific guardrails (paisa-pathshala = education only, dhandha-dimaag = no fabricated facts)
+- 40-55 second scripts (110-150 Hinglish words) so each Short lands in the 35-60s sweet spot
+- A 6-beat viral structure: hook → open loop → stakes → step-by-step delivery → payoff → CTA
+- Pronunciation rules baked in: numbers/currency spelled as Hindi words ("ninyaanve", "ek lakh"),
+  no ₹/% symbols in the spoken text, brand names in Latin, commas + "..." for natural pacing
+- Per-channel guardrails:
+  - **ai-tadka** → reveal a specific AI tool / power-prompt and teach the exact steps
+  - **paisa-pathshala** → honest "make money with AI" side hustles (no guaranteed-income / no investment advice)
+  - **dhandha-dimaag** → "business with AI" automation/ideas (no fabricated company numbers)
 
 ### 3. Render via the full pipeline
 - ElevenLabs Liam voice (Hinglish, social-media tuned)

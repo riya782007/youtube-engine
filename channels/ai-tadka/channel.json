@@ -1,18 +1,27 @@
 {
   "name": "AI Tadka",
   "handle": "@AITadka",
-  "tagline": "Roz ek naya AI tool / trick",
-  "niche": "AI tools & how-to (Hinglish)",
-  "_note": "Check name + handle availability on YouTube before creating the channel. Edit freely.",
+  "tagline": "Roz ek naya AI tool jo aapka kaam aasaan kare",
+  "niche": "AI tools, hacks & how-to (Hinglish) - the best new AI tools and step-by-step tricks for Indian creators, students and professionals",
+  "_note": "PILLAR 1 of the AI trio: AI TOOLS & IDEAS. Keep visually distinct (blue/violet, energetic) from the other two channels to stay clear of YouTube's duplicate/inauthentic-content rules.",
+
+  "content_pillars": [
+    "New / underrated AI tool reveals (one tool, one job, sirf X minute me)",
+    "ChatGPT, Gemini, Claude, Perplexity power-prompts for real tasks",
+    "AI for students & jobs (resume, interview prep, notes, PDF summaries)",
+    "AI image / video / voice tools (Sora, Runway, HeyGen, Ideogram, ElevenLabs)",
+    "Free vs paid AI tool comparisons",
+    "'Yeh AI tool 99% logon ko nahi pata' hidden-gem reveals"
+  ],
 
   "voice": {
     "channel_preset": "ai",
     "speaker": "aditya",
-    "pace": 1.08,
-    "temperature": 0.6,
+    "pace": 1.06,
+    "temperature": 0.62,
     "lang": "hi-IN",
     "_speaker_options_to_try": ["aditya", "kabir", "advait", "soham", "rohan", "vidya", "shreya"],
-    "_note": "speaker overrides the channel_preset's default. aditya = modern young male (best Hindi/Hinglish neutral). kabir = younger / Gen-Z. advait = calm-confident. rohan = energetic but can sound Punjabi. vidya/shreya = female options. Run with `--speaker <name>` on make_video.py to A/B test without editing this file."
+    "_note": "aditya = modern young neutral Hindi/Hinglish male (best fit for AI energy). kabir = younger Gen-Z. advait = calm-confident. Run make_video.py --speaker <name> to A/B test without editing this file. pace 1.06 keeps it punchy without slurring brand names."
   },
 
   "theme": {
@@ -27,12 +36,13 @@
 
   "watermark": "AI TADKA",
   "music_mood": "upbeat electronic / tech",
+  "jamendo_music_tags": "electronic upbeat energetic tech",
   "posting_times_ist": ["13:00", "20:30"],
 
   "seo": {
     "title_suffix": " #shorts",
-    "description_footer": "Roz naye AI tools, tricks aur shortcuts ke liye AI Tadka ko follow karo! 🤖\n\nDisclaimer: Educational + entertainment purpose ke liye.",
-    "default_hashtags": ["#shorts", "#ai", "#aitools", "#artificialintelligence", "#technology", "#hindi"],
-    "tags": ["ai tools", "ai tools hindi", "free ai tools", "artificial intelligence hindi", "chatgpt hindi", "ai for students", "ai productivity", "tech hindi", "ai tutorial hindi", "best ai tools 2026"]
+    "description_footer": "Roz naye AI tools, tricks aur shortcuts ke liye AI Tadka ko follow karo! 🤖\n\nKaunsa AI tool next chahiye? Comment me batao.\n\nDisclaimer: Educational + entertainment purpose ke liye.",
+    "default_hashtags": ["#shorts", "#ai", "#aitools", "#chatgpt", "#artificialintelligence", "#aihindi", "#technology"],
+    "tags": ["ai tools", "ai tools hindi", "free ai tools", "best ai tools 2026", "chatgpt hindi", "chatgpt tricks", "gemini ai", "ai for students", "ai productivity hindi", "ai tutorial hindi", "new ai tools", "ai tools for work", "ai hacks", "perplexity ai", "ai tools india"]
   }
 }
